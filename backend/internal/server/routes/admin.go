@@ -99,6 +99,9 @@ func RegisterAdminRoutes(
 		// 定时测试计划
 		registerScheduledTestRoutes(admin, h)
 
+		// 分组账号健康巡检
+		registerAccountHealthPolicyRoutes(admin, h)
+
 		// 渠道管理
 		registerChannelRoutes(admin, h)
 
@@ -336,7 +339,16 @@ func registerGroupRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 		groups.PUT("/:id/rpm-overrides", h.Admin.Group.BatchSetGroupRPMOverrides)
 		groups.DELETE("/:id/rpm-overrides", h.Admin.Group.ClearGroupRPMOverrides)
 		groups.GET("/:id/api-keys", h.Admin.Group.GetGroupAPIKeys)
+		groups.GET("/:id/health-policy", h.Admin.AccountHealthPolicy.GetByGroup)
+		groups.PUT("/:id/health-policy", h.Admin.AccountHealthPolicy.Upsert)
+		groups.DELETE("/:id/health-policy", h.Admin.AccountHealthPolicy.DeleteByGroup)
+		groups.POST("/:id/health-policy/run", h.Admin.AccountHealthPolicy.RunNow)
+		groups.GET("/:id/health-policy/runs", h.Admin.AccountHealthPolicy.ListRuns)
 	}
+}
+
+func registerAccountHealthPolicyRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+	admin.GET("/account-health-runs/:runId", h.Admin.AccountHealthPolicy.GetRun)
 }
 
 func registerAccountRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpAuth middleware.StepUpAuthMiddleware) {

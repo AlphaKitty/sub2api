@@ -503,6 +503,35 @@ func ProvideScheduledTestRunnerService(
 }
 
 // ProvideOpsScheduledReportService creates and starts OpsScheduledReportService.
+// ProvideAccountHealthPolicyService creates AccountHealthPolicyService.
+func ProvideAccountHealthPolicyService(
+	policyRepo AccountHealthPolicyRepository,
+	runRepo AccountHealthRunRepository,
+	groupRepo GroupRepository,
+	accountRepo AccountRepository,
+	settingSvc *SettingService,
+	accountTestSvc *AccountTestService,
+	rateLimitSvc *RateLimitService,
+) *AccountHealthPolicyService {
+	return NewAccountHealthPolicyService(policyRepo, runRepo, groupRepo, accountRepo, settingSvc, accountTestSvc, rateLimitSvc)
+}
+
+// ProvideAccountHealthPolicyRunnerService creates and starts the runner with leader lock.
+func ProvideAccountHealthPolicyRunnerService(
+	policyRepo AccountHealthPolicyRepository,
+	healthSvc *AccountHealthPolicyService,
+	settingSvc *SettingService,
+	cfg *config.Config,
+	lockCache LeaderLockCache,
+	db *sql.DB,
+) *AccountHealthPolicyRunnerService {
+	svc := NewAccountHealthPolicyRunnerService(policyRepo, healthSvc, settingSvc, cfg)
+	svc.SetLeaderLock(lockCache, db, "account-health-policy-runner")
+	svc.Start()
+	return svc
+}
+
+
 func ProvideOpsScheduledReportService(
 	opsService *OpsService,
 	userService *UserService,
@@ -774,6 +803,8 @@ var ProviderSet = wire.NewSet(
 	ProvideIdempotencyCleanupService,
 	ProvideScheduledTestService,
 	ProvideScheduledTestRunnerService,
+	ProvideAccountHealthPolicyService,
+	ProvideAccountHealthPolicyRunnerService,
 	NewGroupCapacityService,
 	NewChannelService,
 	NewModelPricingResolver,

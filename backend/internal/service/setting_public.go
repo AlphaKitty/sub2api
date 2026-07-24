@@ -219,6 +219,11 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		SettingKeyAccountQuotaNotifyEnabled,
 		SettingKeyChannelMonitorEnabled,
 		SettingKeyChannelMonitorDefaultIntervalSeconds,
+		SettingKeyAccountHealthPolicyEnabled,
+		SettingKeyAccountHealthPolicyDefaultConcurrency,
+		SettingKeyAccountHealthPolicyDefaultTimeoutSeconds,
+		SettingKeyAccountHealthPolicyDefaultCron,
+		SettingKeyAccountHealthPolicyDefaultFailureThreshold,
 		SettingKeyAvailableChannelsEnabled,
 		SettingKeyAffiliateEnabled,
 		SettingKeyRiskControlEnabled,
@@ -329,6 +334,11 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 
 		ChannelMonitorEnabled:                !isFalseSettingValue(settings[SettingKeyChannelMonitorEnabled]),
 		ChannelMonitorDefaultIntervalSeconds: parseChannelMonitorInterval(settings[SettingKeyChannelMonitorDefaultIntervalSeconds]),
+		AccountHealthPolicyEnabled:                 settings[SettingKeyAccountHealthPolicyEnabled] == "true",
+		AccountHealthPolicyDefaultConcurrency:      parseAccountHealthPolicyConcurrency(settings[SettingKeyAccountHealthPolicyDefaultConcurrency]),
+		AccountHealthPolicyDefaultTimeoutSeconds:   parseAccountHealthPolicyTimeout(settings[SettingKeyAccountHealthPolicyDefaultTimeoutSeconds]),
+		AccountHealthPolicyDefaultCron:             parseAccountHealthPolicyCron(settings[SettingKeyAccountHealthPolicyDefaultCron]),
+		AccountHealthPolicyDefaultFailureThreshold: parseAccountHealthPolicyThreshold(settings[SettingKeyAccountHealthPolicyDefaultFailureThreshold]),
 
 		AvailableChannelsEnabled: settings[SettingKeyAvailableChannelsEnabled] == "true",
 
@@ -385,6 +395,11 @@ func (s *SettingService) GetChannelMonitorRuntime(ctx context.Context) ChannelMo
 	vals, err := s.settingRepo.GetMultiple(ctx, []string{
 		SettingKeyChannelMonitorEnabled,
 		SettingKeyChannelMonitorDefaultIntervalSeconds,
+		SettingKeyAccountHealthPolicyEnabled,
+		SettingKeyAccountHealthPolicyDefaultConcurrency,
+		SettingKeyAccountHealthPolicyDefaultTimeoutSeconds,
+		SettingKeyAccountHealthPolicyDefaultCron,
+		SettingKeyAccountHealthPolicyDefaultFailureThreshold,
 	})
 	if err != nil {
 		return ChannelMonitorRuntime{Enabled: true, DefaultIntervalSeconds: channelMonitorIntervalFallback}
@@ -393,6 +408,112 @@ func (s *SettingService) GetChannelMonitorRuntime(ctx context.Context) ChannelMo
 		Enabled:                !isFalseSettingValue(vals[SettingKeyChannelMonitorEnabled]),
 		DefaultIntervalSeconds: parseChannelMonitorInterval(vals[SettingKeyChannelMonitorDefaultIntervalSeconds]),
 	}
+}
+
+
+// AccountHealthPolicyRuntime is the lightweight view consumed by the runner/handlers.
+type AccountHealthPolicyRuntime struct {
+	Enabled                 bool
+	DefaultConcurrency      int
+	DefaultTimeoutSeconds   int
+	DefaultCron             string
+	DefaultFailureThreshold int
+}
+
+const (
+	accountHealthPolicyConcurrencyFallback = 3
+	accountHealthPolicyTimeoutFallback     = 60
+	accountHealthPolicyCronFallback        = "*/30 * * * *"
+	accountHealthPolicyThresholdFallback   = 2
+)
+
+// GetAccountHealthPolicyRuntime reads the feature flags. Fail-closed on error.
+func (s *SettingService) GetAccountHealthPolicyRuntime(ctx context.Context) AccountHealthPolicyRuntime {
+	vals, err := s.settingRepo.GetMultiple(ctx, []string{
+		SettingKeyAccountHealthPolicyEnabled,
+		SettingKeyAccountHealthPolicyDefaultConcurrency,
+		SettingKeyAccountHealthPolicyDefaultTimeoutSeconds,
+		SettingKeyAccountHealthPolicyDefaultCron,
+		SettingKeyAccountHealthPolicyDefaultFailureThreshold,
+	})
+	if err != nil {
+		return AccountHealthPolicyRuntime{
+			Enabled:                 false,
+			DefaultConcurrency:      accountHealthPolicyConcurrencyFallback,
+			DefaultTimeoutSeconds:   accountHealthPolicyTimeoutFallback,
+			DefaultCron:             accountHealthPolicyCronFallback,
+			DefaultFailureThreshold: accountHealthPolicyThresholdFallback,
+		}
+	}
+	return AccountHealthPolicyRuntime{
+		Enabled:                 vals[SettingKeyAccountHealthPolicyEnabled] == "true",
+		DefaultConcurrency:      parseAccountHealthPolicyConcurrency(vals[SettingKeyAccountHealthPolicyDefaultConcurrency]),
+		DefaultTimeoutSeconds:   parseAccountHealthPolicyTimeout(vals[SettingKeyAccountHealthPolicyDefaultTimeoutSeconds]),
+		DefaultCron:             parseAccountHealthPolicyCron(vals[SettingKeyAccountHealthPolicyDefaultCron]),
+		DefaultFailureThreshold: parseAccountHealthPolicyThreshold(vals[SettingKeyAccountHealthPolicyDefaultFailureThreshold]),
+	}
+}
+
+func parseAccountHealthPolicyConcurrency(raw string) int {
+	v, _ := strconv.Atoi(strings.TrimSpace(raw))
+	return clampAccountHealthPolicyConcurrency(v)
+}
+
+func clampAccountHealthPolicyConcurrency(v int) int {
+	if v <= 0 {
+		return accountHealthPolicyConcurrencyFallback
+	}
+	if v < 1 {
+		return 1
+	}
+	if v > 50 {
+		return 50
+	}
+	return v
+}
+
+func parseAccountHealthPolicyTimeout(raw string) int {
+	v, _ := strconv.Atoi(strings.TrimSpace(raw))
+	return clampAccountHealthPolicyTimeout(v)
+}
+
+func clampAccountHealthPolicyTimeout(v int) int {
+	if v <= 0 {
+		return accountHealthPolicyTimeoutFallback
+	}
+	if v < 5 {
+		return 5
+	}
+	if v > 600 {
+		return 600
+	}
+	return v
+}
+
+func parseAccountHealthPolicyThreshold(raw string) int {
+	v, _ := strconv.Atoi(strings.TrimSpace(raw))
+	return clampAccountHealthPolicyThreshold(v)
+}
+
+func clampAccountHealthPolicyThreshold(v int) int {
+	if v <= 0 {
+		return accountHealthPolicyThresholdFallback
+	}
+	if v < 1 {
+		return 1
+	}
+	if v > 20 {
+		return 20
+	}
+	return v
+}
+
+func parseAccountHealthPolicyCron(raw string) string {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return accountHealthPolicyCronFallback
+	}
+	return raw
 }
 
 // AvailableChannelsRuntime is the lightweight view of the available-channels feature
@@ -493,6 +614,12 @@ type PublicSettingsInjectionPayload struct {
 	// that hid the "可用渠道" menu on page refresh.
 	ChannelMonitorEnabled                bool `json:"channel_monitor_enabled"`
 	ChannelMonitorDefaultIntervalSeconds int  `json:"channel_monitor_default_interval_seconds"`
+
+	AccountHealthPolicyEnabled                 bool   `json:"account_health_policy_enabled"`
+	AccountHealthPolicyDefaultConcurrency      int    `json:"account_health_policy_default_concurrency"`
+	AccountHealthPolicyDefaultTimeoutSeconds   int    `json:"account_health_policy_default_timeout_seconds"`
+	AccountHealthPolicyDefaultCron             string `json:"account_health_policy_default_cron"`
+	AccountHealthPolicyDefaultFailureThreshold int    `json:"account_health_policy_default_failure_threshold"`
 	AvailableChannelsEnabled             bool `json:"available_channels_enabled"`
 	AffiliateEnabled                     bool `json:"affiliate_enabled"`
 	RiskControlEnabled                   bool `json:"risk_control_enabled"`
@@ -558,6 +685,11 @@ func (s *SettingService) GetPublicSettingsForInjection(ctx context.Context) (any
 
 		ChannelMonitorEnabled:                settings.ChannelMonitorEnabled,
 		ChannelMonitorDefaultIntervalSeconds: settings.ChannelMonitorDefaultIntervalSeconds,
+		AccountHealthPolicyEnabled:                 settings.AccountHealthPolicyEnabled,
+		AccountHealthPolicyDefaultConcurrency:      settings.AccountHealthPolicyDefaultConcurrency,
+		AccountHealthPolicyDefaultTimeoutSeconds:   settings.AccountHealthPolicyDefaultTimeoutSeconds,
+		AccountHealthPolicyDefaultCron:             settings.AccountHealthPolicyDefaultCron,
+		AccountHealthPolicyDefaultFailureThreshold: settings.AccountHealthPolicyDefaultFailureThreshold,
 		AvailableChannelsEnabled:             settings.AvailableChannelsEnabled,
 		AffiliateEnabled:                     settings.AffiliateEnabled,
 		RiskControlEnabled:                   settings.RiskControlEnabled,

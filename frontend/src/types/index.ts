@@ -237,6 +237,11 @@ export interface PublicSettings {
   balance_low_notify_threshold: number
   channel_monitor_enabled: boolean
   channel_monitor_default_interval_seconds: number
+  account_health_policy_enabled: boolean
+  account_health_policy_default_concurrency: number
+  account_health_policy_default_timeout_seconds: number
+  account_health_policy_default_cron: string
+  account_health_policy_default_failure_threshold: number
   available_channels_enabled: boolean
   service_quota_enabled: boolean
   affiliate_enabled: boolean

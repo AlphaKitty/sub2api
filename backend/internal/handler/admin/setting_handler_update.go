@@ -307,6 +307,13 @@ type UpdateSettingsRequest struct {
 	ChannelMonitorEnabled                *bool `json:"channel_monitor_enabled"`
 	ChannelMonitorDefaultIntervalSeconds *int  `json:"channel_monitor_default_interval_seconds"`
 
+	// Account Health Policy feature switch
+	AccountHealthPolicyEnabled                 *bool   `json:"account_health_policy_enabled"`
+	AccountHealthPolicyDefaultConcurrency      *int    `json:"account_health_policy_default_concurrency"`
+	AccountHealthPolicyDefaultTimeoutSeconds   *int    `json:"account_health_policy_default_timeout_seconds"`
+	AccountHealthPolicyDefaultCron             *string `json:"account_health_policy_default_cron"`
+	AccountHealthPolicyDefaultFailureThreshold *int    `json:"account_health_policy_default_failure_threshold"`
+
 	// Available Channels feature switch (user-facing)
 	AvailableChannelsEnabled *bool `json:"available_channels_enabled"`
 
@@ -1599,6 +1606,36 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 			}
 			return previousSettings.ChannelMonitorDefaultIntervalSeconds
 		}(),
+		AccountHealthPolicyEnabled: func() bool {
+			if req.AccountHealthPolicyEnabled != nil {
+				return *req.AccountHealthPolicyEnabled
+			}
+			return previousSettings.AccountHealthPolicyEnabled
+		}(),
+		AccountHealthPolicyDefaultConcurrency: func() int {
+			if req.AccountHealthPolicyDefaultConcurrency != nil {
+				return *req.AccountHealthPolicyDefaultConcurrency
+			}
+			return previousSettings.AccountHealthPolicyDefaultConcurrency
+		}(),
+		AccountHealthPolicyDefaultTimeoutSeconds: func() int {
+			if req.AccountHealthPolicyDefaultTimeoutSeconds != nil {
+				return *req.AccountHealthPolicyDefaultTimeoutSeconds
+			}
+			return previousSettings.AccountHealthPolicyDefaultTimeoutSeconds
+		}(),
+		AccountHealthPolicyDefaultCron: func() string {
+			if req.AccountHealthPolicyDefaultCron != nil {
+				return *req.AccountHealthPolicyDefaultCron
+			}
+			return previousSettings.AccountHealthPolicyDefaultCron
+		}(),
+		AccountHealthPolicyDefaultFailureThreshold: func() int {
+			if req.AccountHealthPolicyDefaultFailureThreshold != nil {
+				return *req.AccountHealthPolicyDefaultFailureThreshold
+			}
+			return previousSettings.AccountHealthPolicyDefaultFailureThreshold
+		}(),
 		AvailableChannelsEnabled: func() bool {
 			if req.AvailableChannelsEnabled != nil {
 				return *req.AvailableChannelsEnabled
@@ -1992,6 +2029,12 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 
 		ChannelMonitorEnabled:                updatedSettings.ChannelMonitorEnabled,
 		ChannelMonitorDefaultIntervalSeconds: updatedSettings.ChannelMonitorDefaultIntervalSeconds,
+
+		AccountHealthPolicyEnabled:                 updatedSettings.AccountHealthPolicyEnabled,
+		AccountHealthPolicyDefaultConcurrency:      updatedSettings.AccountHealthPolicyDefaultConcurrency,
+		AccountHealthPolicyDefaultTimeoutSeconds:   updatedSettings.AccountHealthPolicyDefaultTimeoutSeconds,
+		AccountHealthPolicyDefaultCron:             updatedSettings.AccountHealthPolicyDefaultCron,
+		AccountHealthPolicyDefaultFailureThreshold: updatedSettings.AccountHealthPolicyDefaultFailureThreshold,
 
 		AvailableChannelsEnabled: updatedSettings.AvailableChannelsEnabled,
 

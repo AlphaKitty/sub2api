@@ -283,6 +283,13 @@ type SystemSettings struct {
 	ChannelMonitorEnabled                bool `json:"channel_monitor_enabled"`
 	ChannelMonitorDefaultIntervalSeconds int  `json:"channel_monitor_default_interval_seconds"`
 
+	// Account Health Policy feature switch
+	AccountHealthPolicyEnabled                 bool   `json:"account_health_policy_enabled"`
+	AccountHealthPolicyDefaultConcurrency      int    `json:"account_health_policy_default_concurrency"`
+	AccountHealthPolicyDefaultTimeoutSeconds   int    `json:"account_health_policy_default_timeout_seconds"`
+	AccountHealthPolicyDefaultCron             string `json:"account_health_policy_default_cron"`
+	AccountHealthPolicyDefaultFailureThreshold int    `json:"account_health_policy_default_failure_threshold"`
+
 	// Available Channels feature switch (user-facing aggregate view)
 	AvailableChannelsEnabled bool `json:"available_channels_enabled"`
 
@@ -366,6 +373,12 @@ type PublicSettings struct {
 
 	ChannelMonitorEnabled                bool `json:"channel_monitor_enabled"`
 	ChannelMonitorDefaultIntervalSeconds int  `json:"channel_monitor_default_interval_seconds"`
+
+	AccountHealthPolicyEnabled                 bool   `json:"account_health_policy_enabled"`
+	AccountHealthPolicyDefaultConcurrency      int    `json:"account_health_policy_default_concurrency"`
+	AccountHealthPolicyDefaultTimeoutSeconds   int    `json:"account_health_policy_default_timeout_seconds"`
+	AccountHealthPolicyDefaultCron             string `json:"account_health_policy_default_cron"`
+	AccountHealthPolicyDefaultFailureThreshold int    `json:"account_health_policy_default_failure_threshold"`
 
 	AvailableChannelsEnabled bool `json:"available_channels_enabled"`
 

@@ -6175,6 +6175,49 @@
         <div class="card">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+              {{ t('admin.settings.features.accountHealthPolicy.title') }}
+            </h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              {{ t('admin.settings.features.accountHealthPolicy.description') }}
+            </p>
+          </div>
+          <div class="space-y-5 p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {{ t('admin.settings.features.accountHealthPolicy.enabled') }}
+                </label>
+                <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                  {{ t('admin.settings.features.accountHealthPolicy.enabledHint') }}
+                </p>
+              </div>
+              <Toggle v-model="form.account_health_policy_enabled" />
+            </div>
+
+            <div v-if="form.account_health_policy_enabled" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label class="input-label">{{ t('admin.settings.features.accountHealthPolicy.defaultConcurrency') }}</label>
+                <input v-model.number="form.account_health_policy_default_concurrency" type="number" min="1" max="50" class="input" />
+              </div>
+              <div>
+                <label class="input-label">{{ t('admin.settings.features.accountHealthPolicy.defaultTimeout') }}</label>
+                <input v-model.number="form.account_health_policy_default_timeout_seconds" type="number" min="5" max="600" class="input" />
+              </div>
+              <div>
+                <label class="input-label">{{ t('admin.settings.features.accountHealthPolicy.defaultCron') }}</label>
+                <input v-model="form.account_health_policy_default_cron" type="text" class="input" />
+              </div>
+              <div>
+                <label class="input-label">{{ t('admin.settings.features.accountHealthPolicy.defaultThreshold') }}</label>
+                <input v-model.number="form.account_health_policy_default_failure_threshold" type="number" min="1" max="20" class="input" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ t('admin.settings.features.availableChannels.title') }}
             </h2>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -8705,6 +8748,11 @@ const form = reactive<SettingsForm>({
   // Channel Monitor feature switch
   channel_monitor_enabled: true,
   channel_monitor_default_interval_seconds: 60,
+  account_health_policy_enabled: false,
+  account_health_policy_default_concurrency: 3,
+  account_health_policy_default_timeout_seconds: 60,
+  account_health_policy_default_cron: '*/30 * * * *',
+  account_health_policy_default_failure_threshold: 2,
   // Available Channels feature switch
   available_channels_enabled: false,
   // Affiliate (邀请返利) feature switch
@@ -10247,6 +10295,11 @@ async function saveSettings() {
       ).filter((e) => e.email.trim() !== ""),
       // Channel Monitor feature switch
       channel_monitor_enabled: form.channel_monitor_enabled,
+      account_health_policy_enabled: form.account_health_policy_enabled,
+      account_health_policy_default_concurrency: form.account_health_policy_default_concurrency,
+      account_health_policy_default_timeout_seconds: form.account_health_policy_default_timeout_seconds,
+      account_health_policy_default_cron: form.account_health_policy_default_cron,
+      account_health_policy_default_failure_threshold: form.account_health_policy_default_failure_threshold,
       channel_monitor_default_interval_seconds:
         Number(form.channel_monitor_default_interval_seconds) || 60,
       // Available Channels feature switch

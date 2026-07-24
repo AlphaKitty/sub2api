@@ -344,6 +344,21 @@ func (s *SettingService) buildSystemSettingsUpdates(ctx context.Context, setting
 		updates[SettingKeyChannelMonitorDefaultIntervalSeconds] = strconv.Itoa(v)
 	}
 
+	// Account health policy feature switch + defaults
+	updates[SettingKeyAccountHealthPolicyEnabled] = strconv.FormatBool(settings.AccountHealthPolicyEnabled)
+	if v := clampAccountHealthPolicyConcurrency(settings.AccountHealthPolicyDefaultConcurrency); v > 0 {
+		updates[SettingKeyAccountHealthPolicyDefaultConcurrency] = strconv.Itoa(v)
+	}
+	if v := clampAccountHealthPolicyTimeout(settings.AccountHealthPolicyDefaultTimeoutSeconds); v > 0 {
+		updates[SettingKeyAccountHealthPolicyDefaultTimeoutSeconds] = strconv.Itoa(v)
+	}
+	if cron := strings.TrimSpace(settings.AccountHealthPolicyDefaultCron); cron != "" {
+		updates[SettingKeyAccountHealthPolicyDefaultCron] = cron
+	}
+	if v := clampAccountHealthPolicyThreshold(settings.AccountHealthPolicyDefaultFailureThreshold); v > 0 {
+		updates[SettingKeyAccountHealthPolicyDefaultFailureThreshold] = strconv.Itoa(v)
+	}
+
 	// Available channels feature switch
 	updates[SettingKeyAvailableChannelsEnabled] = strconv.FormatBool(settings.AvailableChannelsEnabled)
 

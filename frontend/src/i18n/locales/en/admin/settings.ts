@@ -23,6 +23,16 @@ export default {
           defaultInterval: 'Default check interval (seconds)',
           defaultIntervalHint: 'Pre-fills the interval when creating a new monitor; each monitor can override it. Range 15 – 3600.',
         },
+        accountHealthPolicy: {
+          title: 'Account Health Policy',
+          description: 'Probe account model availability by group on a schedule. Failed accounts can be auto-unschedulable after consecutive failures; successes can recover and re-enable. Disabled by default.',
+          enabled: 'Enable account health policy',
+          enabledHint: 'When off, scheduled and manual runs are blocked. Existing group policies are kept.',
+          defaultConcurrency: 'Default concurrency',
+          defaultTimeout: 'Default timeout (seconds)',
+          defaultCron: 'Default cron',
+          defaultThreshold: 'Default consecutive failure threshold',
+        },
         availableChannels: {
           title: 'Available Channels',
           description: 'Show logged-in users an aggregate view of the channels, models and pricing they can access. Disabled by default.',

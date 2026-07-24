@@ -376,6 +376,26 @@ const (
 	// pre-filled when creating a new channel monitor from the admin UI. Range: [15, 3600].
 	SettingKeyChannelMonitorDefaultIntervalSeconds = "channel_monitor_default_interval_seconds"
 
+	// =========================
+	// Account Health Policy (分组账号健康巡检)
+	// =========================
+
+	// SettingKeyAccountHealthPolicyEnabled is the master opt-in switch for group account health policies.
+	// When false: runner skips and manual RunNow is rejected. Defaults to false (fail-closed).
+	SettingKeyAccountHealthPolicyEnabled = "account_health_policy_enabled"
+
+	// SettingKeyAccountHealthPolicyDefaultConcurrency is the concurrency prefilled when creating a policy.
+	SettingKeyAccountHealthPolicyDefaultConcurrency = "account_health_policy_default_concurrency"
+
+	// SettingKeyAccountHealthPolicyDefaultTimeoutSeconds is the per-account probe timeout prefilled on create.
+	SettingKeyAccountHealthPolicyDefaultTimeoutSeconds = "account_health_policy_default_timeout_seconds"
+
+	// SettingKeyAccountHealthPolicyDefaultCron is the cron expression prefilled on create.
+	SettingKeyAccountHealthPolicyDefaultCron = "account_health_policy_default_cron"
+
+	// SettingKeyAccountHealthPolicyDefaultFailureThreshold is consecutive failures before disable_schedulable.
+	SettingKeyAccountHealthPolicyDefaultFailureThreshold = "account_health_policy_default_failure_threshold"
+
 	// SettingKeyAvailableChannelsEnabled is a DB-backed soft switch for the "Available Channels"
 	// user-facing aggregate view. When false: user endpoint returns an empty list and the
 	// sidebar entry is hidden. Defaults to false (opt-in feature).

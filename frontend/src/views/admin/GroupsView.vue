@@ -415,6 +415,15 @@
                 }}</span>
               </button>
               <button
+                @click="handleHealthPolicy(row)"
+                class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-teal-600 dark:hover:bg-dark-700 dark:hover:text-teal-400"
+              >
+                <Icon name="shield" size="sm" />
+                <span class="text-xs">{{
+                  t("admin.groups.healthPolicy")
+                }}</span>
+              </button>
+              <button
                 @click="handleDelete(row)"
                 class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
               >
@@ -3959,6 +3968,13 @@
       @close="showRPMOverridesModal = false"
       @success="loadGroups"
     />
+
+    <GroupHealthPolicyModal
+      :show="showHealthPolicyModal"
+      :group="healthPolicyGroup"
+      @close="showHealthPolicyModal = false"
+    />
+
   </AppLayout>
 </template>
 
@@ -4443,6 +4459,8 @@ const showRateMultipliersModal = ref(false);
 const rateMultipliersGroup = ref<AdminGroup | null>(null);
 const showRPMOverridesModal = ref(false);
 const rpmOverridesGroup = ref<AdminGroup | null>(null);
+const showHealthPolicyModal = ref(false);
+const healthPolicyGroup = ref<AdminGroup | null>(null);
 const sortableGroups = ref<AdminGroup[]>([]);
 type ConcreteGroupPlatform = Exclude<GroupPlatform, "composite">;
 type CompositeRouteFormState = {
@@ -5672,6 +5690,11 @@ const handleRateMultipliers = (group: AdminGroup) => {
 const handleRPMOverrides = (group: AdminGroup) => {
   rpmOverridesGroup.value = group;
   showRPMOverridesModal.value = true;
+};
+
+const handleHealthPolicy = (group: AdminGroup) => {
+  healthPolicyGroup.value = group;
+  showHealthPolicyModal.value = true;
 };
 
 const handleDuplicate = async (group: AdminGroup) => {

@@ -187,6 +187,13 @@ func (s *SettingService) InitializeDefaultSettings(ctx context.Context) error {
 		SettingKeyChannelMonitorEnabled:                "true",
 		SettingKeyChannelMonitorDefaultIntervalSeconds: "60",
 
+		// Account health policy defaults (disabled; opt-in)
+		SettingKeyAccountHealthPolicyEnabled:                 "false",
+		SettingKeyAccountHealthPolicyDefaultConcurrency:      "3",
+		SettingKeyAccountHealthPolicyDefaultTimeoutSeconds:   "60",
+		SettingKeyAccountHealthPolicyDefaultCron:             "*/30 * * * *",
+		SettingKeyAccountHealthPolicyDefaultFailureThreshold: "2",
+
 		// Available channels feature (default disabled; opt-in)
 		SettingKeyAvailableChannelsEnabled: "false",
 
@@ -757,6 +764,21 @@ func (s *SettingService) parseSettings(settings map[string]string) *SystemSettin
 	result.ChannelMonitorEnabled = !isFalseSettingValue(settings[SettingKeyChannelMonitorEnabled])
 	result.ChannelMonitorDefaultIntervalSeconds = parseChannelMonitorInterval(
 		settings[SettingKeyChannelMonitorDefaultIntervalSeconds],
+	)
+
+	// Account health policy (default: disabled; strict true)
+	result.AccountHealthPolicyEnabled = settings[SettingKeyAccountHealthPolicyEnabled] == "true"
+	result.AccountHealthPolicyDefaultConcurrency = parseAccountHealthPolicyConcurrency(
+		settings[SettingKeyAccountHealthPolicyDefaultConcurrency],
+	)
+	result.AccountHealthPolicyDefaultTimeoutSeconds = parseAccountHealthPolicyTimeout(
+		settings[SettingKeyAccountHealthPolicyDefaultTimeoutSeconds],
+	)
+	result.AccountHealthPolicyDefaultCron = parseAccountHealthPolicyCron(
+		settings[SettingKeyAccountHealthPolicyDefaultCron],
+	)
+	result.AccountHealthPolicyDefaultFailureThreshold = parseAccountHealthPolicyThreshold(
+		settings[SettingKeyAccountHealthPolicyDefaultFailureThreshold],
 	)
 
 	// Available channels feature (default: disabled; strict true)

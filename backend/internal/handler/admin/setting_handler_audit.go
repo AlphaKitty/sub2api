@@ -522,7 +522,22 @@ func diffSettings(before *service.SystemSettings, after *service.SystemSettings,
 	if before.ChannelMonitorDefaultIntervalSeconds != after.ChannelMonitorDefaultIntervalSeconds {
 		changed = append(changed, "channel_monitor_default_interval_seconds")
 	}
-	if before.AvailableChannelsEnabled != after.AvailableChannelsEnabled {
+		if before.AccountHealthPolicyEnabled != after.AccountHealthPolicyEnabled {
+		changed = append(changed, "account_health_policy_enabled")
+	}
+	if before.AccountHealthPolicyDefaultConcurrency != after.AccountHealthPolicyDefaultConcurrency {
+		changed = append(changed, "account_health_policy_default_concurrency")
+	}
+	if before.AccountHealthPolicyDefaultTimeoutSeconds != after.AccountHealthPolicyDefaultTimeoutSeconds {
+		changed = append(changed, "account_health_policy_default_timeout_seconds")
+	}
+	if before.AccountHealthPolicyDefaultCron != after.AccountHealthPolicyDefaultCron {
+		changed = append(changed, "account_health_policy_default_cron")
+	}
+	if before.AccountHealthPolicyDefaultFailureThreshold != after.AccountHealthPolicyDefaultFailureThreshold {
+		changed = append(changed, "account_health_policy_default_failure_threshold")
+	}
+if before.AvailableChannelsEnabled != after.AvailableChannelsEnabled {
 		changed = append(changed, "available_channels_enabled")
 	}
 	if before.AffiliateEnabled != after.AffiliateEnabled {

@@ -23,6 +23,16 @@ export default {
           defaultInterval: '默认检测间隔（秒）',
           defaultIntervalHint: '新建渠道监控时表单的默认值，可被单个渠道覆盖。范围 15 – 3600 秒。',
         },
+        accountHealthPolicy: {
+          title: '账号健康巡检',
+          description: '按分组定时探测账号模型可用性，连续失败可自动关闭调度，成功后可恢复。默认关闭。',
+          enabled: '启用账号健康巡检',
+          enabledHint: '关闭后定时任务与手动执行均不可用；已有分组策略配置会保留。',
+          defaultConcurrency: '默认并发数',
+          defaultTimeout: '默认超时（秒）',
+          defaultCron: '默认 Cron',
+          defaultThreshold: '默认连续失败阈值',
+        },
         availableChannels: {
           title: '可用渠道',
           description: '向已登录用户展示他们能访问的渠道、模型和定价聚合视图。默认关闭。',

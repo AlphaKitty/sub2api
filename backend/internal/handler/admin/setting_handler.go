@@ -343,7 +343,11 @@ func (h *SettingHandler) GetSettings(c *gin.Context) {
 
 		ChannelMonitorEnabled:                settings.ChannelMonitorEnabled,
 		ChannelMonitorDefaultIntervalSeconds: settings.ChannelMonitorDefaultIntervalSeconds,
-
+		AccountHealthPolicyEnabled:                 settings.AccountHealthPolicyEnabled,
+		AccountHealthPolicyDefaultConcurrency:      settings.AccountHealthPolicyDefaultConcurrency,
+		AccountHealthPolicyDefaultTimeoutSeconds:   settings.AccountHealthPolicyDefaultTimeoutSeconds,
+		AccountHealthPolicyDefaultCron:             settings.AccountHealthPolicyDefaultCron,
+		AccountHealthPolicyDefaultFailureThreshold: settings.AccountHealthPolicyDefaultFailureThreshold,
 		AvailableChannelsEnabled: settings.AvailableChannelsEnabled,
 
 		AffiliateEnabled: settings.AffiliateEnabled,
