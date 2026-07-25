@@ -18,7 +18,7 @@ services:
     container_name: sub2api-sirthisway
     restart: unless-stopped
     ports:
-      - "${BIND_HOST:-127.0.0.1}:${SERVER_PORT:-8081}:8080"
+      - "${BIND_HOST:-127.0.0.1}:${SERVER_PORT:-8082}:8080"
     volumes:
       - ./data_sirthisway:/app/data:Z
     environment:
