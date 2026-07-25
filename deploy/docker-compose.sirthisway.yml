@@ -21,6 +21,8 @@ services:
       - "${BIND_HOST:-127.0.0.1}:${SERVER_PORT:-8082}:8080"
     volumes:
       - ./data_sirthisway:/app/data:Z
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - AUTO_SETUP=true
       - SERVER_HOST=0.0.0.0
@@ -47,10 +49,10 @@ services:
       - TZ=${TZ:-Asia/Shanghai}
       # Local mainland-China development proxy. Containers cannot use
       # 127.0.0.1 for the host proxy, so default to Docker Desktop's host name.
-      - HTTP_PROXY=${SUB2API_DEV_HTTP_PROXY:-http://host.docker.internal:7897}
-      - HTTPS_PROXY=${SUB2API_DEV_HTTPS_PROXY:-http://host.docker.internal:7897}
-      - ALL_PROXY=${SUB2API_DEV_ALL_PROXY:-socks5://host.docker.internal:7897}
-      - NO_PROXY=${SUB2API_DEV_NO_PROXY:-127.0.0.1,localhost,::1,postgres,redis,sub2api,192.168.0.0/16,10.0.0.0/8,172.16.0.0/12,.local}
+      - HTTP_PROXY=${SUB2API_DEV_HTTP_PROXY-http://host.docker.internal:7897}
+      - HTTPS_PROXY=${SUB2API_DEV_HTTPS_PROXY-http://host.docker.internal:7897}
+      - ALL_PROXY=${SUB2API_DEV_ALL_PROXY-socks5://host.docker.internal:7897}
+      - NO_PROXY=${SUB2API_DEV_NO_PROXY-127.0.0.1,localhost,::1,postgres,redis,sub2api,192.168.0.0/16,10.0.0.0/8,172.16.0.0/12,.local}
       # OpenAI HTTP upstream protocol/timeout
       - GATEWAY_OPENAI_RESPONSE_HEADER_TIMEOUT=${GATEWAY_OPENAI_RESPONSE_HEADER_TIMEOUT:-0}
       - GATEWAY_OPENAI_HTTP2_ENABLED=${GATEWAY_OPENAI_HTTP2_ENABLED:-true}
