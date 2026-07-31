@@ -201,6 +201,7 @@ export interface PublicSettings {
   login_agreement_revision?: string
   login_agreement_documents?: LoginAgreementDocument[]
   turnstile_enabled: boolean
+  passkey_enabled?: boolean
   turnstile_site_key: string
   site_name: string
   site_logo: string
@@ -243,6 +244,8 @@ export interface PublicSettings {
   account_health_policy_default_cron: string
   account_health_policy_default_failure_threshold: number
   available_channels_enabled: boolean
+  model_plaza_enabled: boolean
+  model_plaza_require_auth: boolean
   service_quota_enabled: boolean
   affiliate_enabled: boolean
   allow_user_view_error_requests?: boolean
