@@ -9,7 +9,6 @@ import (
 	"time"
 
 	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
-	sharedhttp "github.com/Wei-Shaw/sub2api/internal/pkg/httpclient"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/xai"
 	"github.com/Wei-Shaw/sub2api/internal/service"
 	"github.com/Wei-Shaw/sub2api/internal/util/logredact"
@@ -112,20 +111,17 @@ func createGrokReqClient(proxyURL string) (*req.Client, error) {
 	})
 }
 
-func createGrokSSOHTTPClient(proxyURL string) (*http.Client, error) {
-	client, err := sharedhttp.GetClient(sharedhttp.Options{
-		ProxyURL:              proxyURL,
-		Timeout:               xai.SSOConversionTimeout,
-		ResponseHeaderTimeout: 30 * time.Second,
+func createGrokSSOHTTPClient(proxyURL string) (xai.SSODeviceHTTPClient, error) {
+	client, err := getSharedReqClient(reqClientOptions{
+		ProxyURL:    proxyURL,
+		Timeout:     xai.SSOConversionTimeout,
+		Impersonate: true,
+		NoRedirect:  true,
 	})
 	if err != nil {
 		return nil, err
 	}
-	clone := *client
-	clone.CheckRedirect = func(*http.Request, []*http.Request) error {
-		return http.ErrUseLastResponse
-	}
-	return &clone, nil
+	return client, nil
 }
 
 func grokSSOConversionError(err error) error {

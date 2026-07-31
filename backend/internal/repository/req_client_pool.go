@@ -19,6 +19,7 @@ type reqClientOptions struct {
 	Timeout     time.Duration // 请求超时时间
 	Impersonate bool          // 是否模拟 Chrome 浏览器指纹
 	ForceHTTP2  bool          // 是否强制使用 HTTP/2
+	NoRedirect  bool          // 禁用自动跟随重定向（手动处理 302）
 }
 
 // sharedReqClients 存储按配置参数缓存的 req 客户端实例
@@ -52,6 +53,9 @@ func getSharedReqClient(opts reqClientOptions) (*req.Client, error) {
 	if opts.Impersonate {
 		client = client.ImpersonateChrome()
 	}
+	if opts.NoRedirect {
+		client = client.SetRedirectPolicy(req.NoRedirectPolicy())
+	}
 	trimmed, _, err := proxyurl.Parse(opts.ProxyURL)
 	if err != nil {
 		return nil, err
@@ -80,11 +84,12 @@ func instrumentReqClient(client *req.Client) *req.Client {
 }
 
 func buildReqClientKey(opts reqClientOptions) string {
-	return fmt.Sprintf("%s|%s|%t|%t",
+	return fmt.Sprintf("%s|%s|%t|%t|%t",
 		strings.TrimSpace(opts.ProxyURL),
 		opts.Timeout.String(),
 		opts.Impersonate,
 		opts.ForceHTTP2,
+		opts.NoRedirect,
 	)
 }
 
