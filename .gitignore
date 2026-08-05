@@ -143,3 +143,6 @@ docs/*
 frontend/coverage/
 aicodex
 output/
+
+# IDE debug binary
+backend/cmd/server/__debug_bin*

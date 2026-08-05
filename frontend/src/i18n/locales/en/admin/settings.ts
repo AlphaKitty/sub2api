@@ -28,6 +28,7 @@ export default {
           description: 'Probe account model availability by group on a schedule. Failed accounts can be auto-unschedulable after consecutive failures; successes can recover and re-enable. Disabled by default.',
           enabled: 'Enable account health policy',
           enabledHint: 'When off, scheduled and manual runs are blocked. Existing group policies are kept.',
+          groupPolicyHint: 'After enabling, you must also open Groups → the target group → Health Check and enable the per-group policy (off by default), then save, for scheduled runs to execute.',
           defaultConcurrency: 'Default concurrency',
           defaultTimeout: 'Default timeout (seconds)',
           defaultCron: 'Default cron',

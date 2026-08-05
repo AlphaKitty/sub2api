@@ -28,6 +28,7 @@ export default {
           description: '按分组定时探测账号模型可用性，连续失败可自动关闭调度，成功后可恢复。默认关闭。',
           enabled: '启用账号健康巡检',
           enabledHint: '关闭后定时任务与手动执行均不可用；已有分组策略配置会保留。',
+          groupPolicyHint: '开启后还需在「分组管理 → 对应分组 → 健康巡检」中为分组启用策略（默认关闭）并保存，才会定时执行。',
           defaultConcurrency: '默认并发数',
           defaultTimeout: '默认超时（秒）',
           defaultCron: '默认 Cron',

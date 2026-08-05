@@ -14,7 +14,11 @@ import (
 
 const (
 	accountHealthPolicyRunnerLeaderKey = "account_health_policy:runner:leader"
-	accountHealthPolicyRunnerLeaderTTL = 4 * time.Minute
+	// 单轮巡检预算：需要覆盖“账号数 × 单账号探测超时 / 并发”的最坏情况。
+	// 默认并发 3、超时 60s 时，4 分钟预算只能覆盖约 12 个账号，账号多的分组会被截断、
+	// 排在后半段的账号永远探测不到，也不会被自动停用。
+	accountHealthPolicyRunnerTickTimeout = 15 * time.Minute
+	accountHealthPolicyRunnerLeaderTTL   = 15 * time.Minute
 )
 
 // AccountHealthPolicyRunnerService periodically executes due group health policies.
@@ -31,6 +35,9 @@ type AccountHealthPolicyRunnerService struct {
 	cron      *cron.Cron
 	startOnce sync.Once
 	stopOnce  sync.Once
+
+	switchOffLogged     sync.Once
+	noDuePoliciesLogged sync.Once
 }
 
 func NewAccountHealthPolicyRunnerService(
@@ -105,7 +112,7 @@ func (s *AccountHealthPolicyRunnerService) runScheduled() {
 	// Skew away from :00 like scheduled tests.
 	time.Sleep(15 * time.Second)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), accountHealthPolicyRunnerTickTimeout)
 	defer cancel()
 
 	release, ok := tryAcquireSingletonLeaderLock(ctx, s.lockCache, s.db, accountHealthPolicyRunnerLeaderKey, s.instanceID, accountHealthPolicyRunnerLeaderTTL)
@@ -114,7 +121,15 @@ func (s *AccountHealthPolicyRunnerService) runScheduled() {
 	}
 	defer release()
 
-	if s.settingSvc == nil || !s.settingSvc.GetAccountHealthPolicyRuntime(ctx).Enabled {
+	if s.settingSvc == nil {
+		return
+	}
+	runtime := s.settingSvc.GetAccountHealthPolicyRuntime(ctx)
+	if !runtime.Enabled {
+		// 只提示一次，避免每分钟刷日志；帮助定位“开了没生效”的配置问题。
+		s.switchOffLogged.Do(func() {
+			logger.LegacyPrintf("service.account_health_policy_runner", "[AccountHealthPolicyRunner] skipped: account_health_policy_enabled is off; enable it in 系统设置 → 功能开关, then enable a per-group health policy in 分组管理 to activate")
+		})
 		return
 	}
 
@@ -125,6 +140,12 @@ func (s *AccountHealthPolicyRunnerService) runScheduled() {
 		return
 	}
 	if len(policies) == 0 {
+		// 开关已开启但没有到期策略：一次性提示，避免每分钟刷屏。
+		// 常见原因：分组策略未启用（account_health_policies.enabled=false）、
+		// next_run_at 在未来、或该分组没有策略。
+		s.noDuePoliciesLogged.Do(func() {
+			logger.LegacyPrintf("service.account_health_policy_runner", "[AccountHealthPolicyRunner] no due policies: open 分组管理 → 对应分组 → 健康巡检 and make sure the policy is enabled with a model and a valid cron (next_run_at must be in the past)")
+		})
 		return
 	}
 

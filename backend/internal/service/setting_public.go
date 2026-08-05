@@ -350,8 +350,8 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		BalanceLowNotifyThreshold:        balanceLowNotifyThreshold,
 		BalanceLowNotifyRechargeURL:      settings[SettingKeyBalanceLowNotifyRechargeURL],
 
-		ChannelMonitorEnabled:                !isFalseSettingValue(settings[SettingKeyChannelMonitorEnabled]),
-		ChannelMonitorDefaultIntervalSeconds: parseChannelMonitorInterval(settings[SettingKeyChannelMonitorDefaultIntervalSeconds]),
+		ChannelMonitorEnabled:                      !isFalseSettingValue(settings[SettingKeyChannelMonitorEnabled]),
+		ChannelMonitorDefaultIntervalSeconds:       parseChannelMonitorInterval(settings[SettingKeyChannelMonitorDefaultIntervalSeconds]),
 		AccountHealthPolicyEnabled:                 settings[SettingKeyAccountHealthPolicyEnabled] == "true",
 		AccountHealthPolicyDefaultConcurrency:      parseAccountHealthPolicyConcurrency(settings[SettingKeyAccountHealthPolicyDefaultConcurrency]),
 		AccountHealthPolicyDefaultTimeoutSeconds:   parseAccountHealthPolicyTimeout(settings[SettingKeyAccountHealthPolicyDefaultTimeoutSeconds]),
@@ -416,11 +416,6 @@ func (s *SettingService) GetChannelMonitorRuntime(ctx context.Context) ChannelMo
 	vals, err := s.settingRepo.GetMultiple(ctx, []string{
 		SettingKeyChannelMonitorEnabled,
 		SettingKeyChannelMonitorDefaultIntervalSeconds,
-		SettingKeyAccountHealthPolicyEnabled,
-		SettingKeyAccountHealthPolicyDefaultConcurrency,
-		SettingKeyAccountHealthPolicyDefaultTimeoutSeconds,
-		SettingKeyAccountHealthPolicyDefaultCron,
-		SettingKeyAccountHealthPolicyDefaultFailureThreshold,
 	})
 	if err != nil {
 		return ChannelMonitorRuntime{Enabled: true, DefaultIntervalSeconds: channelMonitorIntervalFallback}
@@ -430,7 +425,6 @@ func (s *SettingService) GetChannelMonitorRuntime(ctx context.Context) ChannelMo
 		DefaultIntervalSeconds: parseChannelMonitorInterval(vals[SettingKeyChannelMonitorDefaultIntervalSeconds]),
 	}
 }
-
 
 // AccountHealthPolicyRuntime is the lightweight view consumed by the runner/handlers.
 type AccountHealthPolicyRuntime struct {
@@ -676,12 +670,12 @@ type PublicSettingsInjectionPayload struct {
 	AccountHealthPolicyDefaultTimeoutSeconds   int    `json:"account_health_policy_default_timeout_seconds"`
 	AccountHealthPolicyDefaultCron             string `json:"account_health_policy_default_cron"`
 	AccountHealthPolicyDefaultFailureThreshold int    `json:"account_health_policy_default_failure_threshold"`
-	AvailableChannelsEnabled             bool `json:"available_channels_enabled"`
-	ModelPlazaEnabled                    bool `json:"model_plaza_enabled"`
-	ModelPlazaRequireAuth                bool `json:"model_plaza_require_auth"`
-	AffiliateEnabled                     bool `json:"affiliate_enabled"`
-	RiskControlEnabled                   bool `json:"risk_control_enabled"`
-	AllowUserViewErrorRequests           bool `json:"allow_user_view_error_requests"`
+	AvailableChannelsEnabled                   bool   `json:"available_channels_enabled"`
+	ModelPlazaEnabled                          bool   `json:"model_plaza_enabled"`
+	ModelPlazaRequireAuth                      bool   `json:"model_plaza_require_auth"`
+	AffiliateEnabled                           bool   `json:"affiliate_enabled"`
+	RiskControlEnabled                         bool   `json:"risk_control_enabled"`
+	AllowUserViewErrorRequests                 bool   `json:"allow_user_view_error_requests"`
 }
 
 // GetPublicSettingsForInjection returns public settings in a format suitable for HTML injection.
@@ -749,19 +743,19 @@ func (s *SettingService) GetPublicSettingsForInjection(ctx context.Context) (any
 		BalanceLowNotifyThreshold:        settings.BalanceLowNotifyThreshold,
 		BalanceLowNotifyRechargeURL:      settings.BalanceLowNotifyRechargeURL,
 
-		ChannelMonitorEnabled:                settings.ChannelMonitorEnabled,
-		ChannelMonitorDefaultIntervalSeconds: settings.ChannelMonitorDefaultIntervalSeconds,
+		ChannelMonitorEnabled:                      settings.ChannelMonitorEnabled,
+		ChannelMonitorDefaultIntervalSeconds:       settings.ChannelMonitorDefaultIntervalSeconds,
 		AccountHealthPolicyEnabled:                 settings.AccountHealthPolicyEnabled,
 		AccountHealthPolicyDefaultConcurrency:      settings.AccountHealthPolicyDefaultConcurrency,
 		AccountHealthPolicyDefaultTimeoutSeconds:   settings.AccountHealthPolicyDefaultTimeoutSeconds,
 		AccountHealthPolicyDefaultCron:             settings.AccountHealthPolicyDefaultCron,
 		AccountHealthPolicyDefaultFailureThreshold: settings.AccountHealthPolicyDefaultFailureThreshold,
-		AvailableChannelsEnabled:             settings.AvailableChannelsEnabled,
-		ModelPlazaEnabled:                    settings.ModelPlazaEnabled,
-		ModelPlazaRequireAuth:                settings.ModelPlazaRequireAuth,
-		AffiliateEnabled:                     settings.AffiliateEnabled,
-		RiskControlEnabled:                   settings.RiskControlEnabled,
-		AllowUserViewErrorRequests:           settings.AllowUserViewErrorRequests,
+		AvailableChannelsEnabled:                   settings.AvailableChannelsEnabled,
+		ModelPlazaEnabled:                          settings.ModelPlazaEnabled,
+		ModelPlazaRequireAuth:                      settings.ModelPlazaRequireAuth,
+		AffiliateEnabled:                           settings.AffiliateEnabled,
+		RiskControlEnabled:                         settings.RiskControlEnabled,
+		AllowUserViewErrorRequests:                 settings.AllowUserViewErrorRequests,
 	}, nil
 }
 

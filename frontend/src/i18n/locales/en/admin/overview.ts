@@ -918,7 +918,7 @@ export default {
       rpmOverridesTitle: 'Group RPM Overrides',
       healthPolicy: 'Health Policy',
       healthPolicyTitle: 'Group Account Health Policy',
-      healthPolicyGlobalHint: 'Enable Account Health Policy under Settings → Features before scheduled or manual runs take effect.',
+      healthPolicyGlobalHint: 'To take effect: ① enable Account Health Policy under Settings → Features; ② turn on this group\'s Enable toggle (off by default); ③ save and wait for the cron schedule, or click Run Now to verify manually.',
       healthPolicyEnabled: 'Enable policy for this group',
       healthPolicyModel: 'Test model',
       healthPolicyCron: 'Cron expression',

@@ -6821,6 +6821,10 @@
               <Toggle v-model="form.account_health_policy_enabled" />
             </div>
 
+            <div v-if="form.account_health_policy_enabled" class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-200">
+              {{ t('admin.settings.features.accountHealthPolicy.groupPolicyHint') }}
+            </div>
+
             <div v-if="form.account_health_policy_enabled" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label class="input-label">{{ t('admin.settings.features.accountHealthPolicy.defaultConcurrency') }}</label>

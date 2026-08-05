@@ -929,7 +929,7 @@ export default {
       rpmOverridesTitle: '分组专属 RPM 管理',
       healthPolicy: '健康巡检',
       healthPolicyTitle: '分组账号健康巡检',
-      healthPolicyGlobalHint: '需在「系统设置 → 功能开关」启用账号健康巡检后，定时任务与手动执行才会生效。',
+      healthPolicyGlobalHint: '生效条件：①「系统设置 → 功能开关」需启用账号健康巡检；② 本分组的「启用」开关需打开（默认关闭）；③ 保存后按 cron 定时执行，也可点「立即执行」手动验证。',
       healthPolicyEnabled: '启用该分组策略',
       healthPolicyModel: '测试模型',
       healthPolicyCron: 'Cron 表达式',
