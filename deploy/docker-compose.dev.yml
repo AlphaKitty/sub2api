@@ -17,6 +17,8 @@ services:
         NPM_CONFIG_REGISTRY: ${NPM_CONFIG_REGISTRY:-https://registry.npmmirror.com}
     container_name: sub2api-sirthisway
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     ports:
       - "${BIND_HOST:-127.0.0.1}:${SERVER_PORT:-8082}:8080"
     volumes:
