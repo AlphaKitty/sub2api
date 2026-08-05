@@ -932,6 +932,7 @@ export default {
       healthPolicyGlobalHint: '生效条件：①「系统设置 → 功能开关」需启用账号健康巡检；② 本分组的「启用」开关需打开（默认关闭）；③ 保存后按 cron 定时执行，也可点「立即执行」手动验证。',
       healthPolicyEnabled: '启用该分组策略',
       healthPolicyModel: '测试模型',
+      healthPolicyModelHint: '需为该分组平台支持的模型，例如 {model}（填错会导致全部账号探测失败）',
       healthPolicyCron: 'Cron 表达式',
       healthPolicyConcurrency: '并发数',
       healthPolicyTimeout: '超时（秒）',

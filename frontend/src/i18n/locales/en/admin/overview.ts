@@ -921,6 +921,7 @@ export default {
       healthPolicyGlobalHint: 'To take effect: ① enable Account Health Policy under Settings → Features; ② turn on this group\'s Enable toggle (off by default); ③ save and wait for the cron schedule, or click Run Now to verify manually.',
       healthPolicyEnabled: 'Enable policy for this group',
       healthPolicyModel: 'Test model',
+      healthPolicyModelHint: 'Must be a model supported by this group\'s platform, e.g. {model} (wrong model fails every probe)',
       healthPolicyCron: 'Cron expression',
       healthPolicyConcurrency: 'Concurrency',
       healthPolicyTimeout: 'Timeout (seconds)',

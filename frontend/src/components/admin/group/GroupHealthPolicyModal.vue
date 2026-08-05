@@ -37,7 +37,10 @@
             <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
               {{ t('admin.groups.healthPolicyModel') }}
             </label>
-            <Input v-model="form.model_id" :placeholder="'gpt-5.4'" />
+            <Input v-model="form.model_id" :placeholder="defaultModelForPlatform(group.platform)" />
+            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+              {{ t('admin.groups.healthPolicyModelHint', { model: defaultModelForPlatform(group.platform) }) }}
+            </p>
           </div>
 
           <div>
@@ -227,7 +230,7 @@ const runDetail = ref<AccountHealthRun | null>(null)
 
 const form = reactive({
   enabled: false,
-  model_id: 'gpt-5.4',
+  model_id: '',
   cron_expression: '*/30 * * * *',
   concurrency: 3,
   timeout_seconds: 60,
@@ -237,6 +240,20 @@ const form = reactive({
   on_success_enable_if_disabled: true
 })
 
+// 各平台默认测试模型，与后端 AccountTestService 保持一致。
+// 必须填写该分组平台支持的模型，否则探测会失败（例如 Grok 分组填 gpt-5.4 会返回 404）。
+const platformDefaultModels: Record<string, string> = {
+  anthropic: 'claude-sonnet-4-5-20250929',
+  openai: 'gpt-5.4',
+  gemini: 'gemini-2.0-flash',
+  antigravity: 'claude-sonnet-4-5',
+  grok: 'grok-4.5'
+}
+
+function defaultModelForPlatform(platform: string): string {
+  return platformDefaultModels[platform] ?? 'claude-sonnet-4-5-20250929'
+}
+
 const failureActionOptions = computed(() => [
   { value: 'disable_schedulable', label: t('admin.groups.healthPolicyActionDisable') },
   { value: 'none', label: t('admin.groups.healthPolicyActionNone') }
@@ -244,8 +261,9 @@ const failureActionOptions = computed(() => [
 
 function resetForm(policy: AccountHealthPolicy | null) {
   hasPolicy.value = !!policy
+  const defaultModel = defaultModelForPlatform(props.group?.platform ?? '')
   form.enabled = policy?.enabled ?? false
-  form.model_id = policy?.model_id || 'gpt-5.4'
+  form.model_id = policy?.model_id || defaultModel
   form.cron_expression = policy?.cron_expression || '*/30 * * * *'
   form.concurrency = policy?.concurrency || 3
   form.timeout_seconds = policy?.timeout_seconds || 60
