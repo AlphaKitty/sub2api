@@ -93,4 +93,20 @@ describe('ccswitchImport utils', () => {
     expect(params.get('endpoint')).toBe(`${baseInput.baseUrl}/antigravity`)
     expect(params.has('model')).toBe(false)
   })
+
+  // 展示平台驱动导入配置：分组对外展示为 openai（实际 grok）时，
+  // 导入 deeplink 按 openai 供应商生成，用户看到的是 Codex + gpt-5.5。
+  it('imports per the display platform when it differs from the real platform', () => {
+    const params = paramsFromDeeplink(
+      buildCcSwitchImportDeeplink({
+        ...baseInput,
+        platform: 'openai',
+        clientType: 'claude'
+      })
+    )
+
+    expect(params.get('app')).toBe('codex')
+    expect(params.get('endpoint')).toBe(baseInput.baseUrl)
+    expect(params.get('model')).toBe(OPENAI_CC_SWITCH_CODEX_MODEL)
+  })
 })

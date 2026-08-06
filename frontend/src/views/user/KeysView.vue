@@ -1153,6 +1153,7 @@ import {
   buildCcSwitchImportDeeplink,
   type CcSwitchClientType
 } from '@/utils/ccswitchImport'
+import { effectiveGroupPlatform } from '@/utils/groupPlatform'
 
 // Helper to format date for datetime-local input
 const formatDateTimeLocal = (isoDate: string): string => {
@@ -1876,7 +1877,9 @@ const resetRateLimitUsage = async () => {
 }
 
 const importToCcswitch = (row: ApiKey) => {
-  const platform = row.group?.platform || 'anthropic'
+  // CCS 导入供应商配置跟随对外展示平台（display_platform 优先），
+  // 让用户看到的导入厂商与分组品牌一致；真实请求仍由网关按功能平台路由。
+  const platform = effectiveGroupPlatform(row.group)
 
   // For antigravity platform, show client selection dialog
   if (platform === 'antigravity') {
@@ -1891,7 +1894,7 @@ const importToCcswitch = (row: ApiKey) => {
 
 const executeCcsImport = (row: ApiKey, clientType: CcSwitchClientType) => {
   const baseUrl = publicSettings.value?.api_base_url || window.location.origin
-  const platform = row.group?.platform || 'anthropic'
+  const platform = effectiveGroupPlatform(row.group)
 
   const usageScript = `({
     request: {
