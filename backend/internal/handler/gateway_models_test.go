@@ -5,7 +5,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
+
+	"github.com/Wei-Shaw/sub2api/internal/config"
 
 	middleware2 "github.com/Wei-Shaw/sub2api/internal/server/middleware"
 	"github.com/Wei-Shaw/sub2api/internal/service"
@@ -790,4 +794,70 @@ func TestGatewayModels_CustomModelsListFollowsDisplayPlatformAnthropic(t *testin
 	// claude 形状：无 created/owned_by，created_at 为固定占位值。
 	require.Equal(t, "2024-01-01T00:00:00Z", got.Data[0].CreatedAt)
 	require.Zero(t, got.Data[0].Created)
+}
+
+// newTestPricingService 用本地 fallback 定价目录构造 PricingService（无网络依赖）。
+func newTestPricingService(t *testing.T) *service.PricingService {
+	t.Helper()
+	dataDir := t.TempDir()
+	src, err := os.ReadFile("../../resources/model-pricing/model_prices_and_context_window.json")
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(filepath.Join(dataDir, "model_pricing.json"), src, 0o644))
+	cfg := &config.Config{}
+	cfg.Pricing.DataDir = dataDir
+	svc := service.NewPricingService(cfg, nil)
+	require.NoError(t, svc.Initialize())
+	t.Cleanup(svc.Stop)
+	return svc
+}
+
+func TestMergePricingCatalogModels(t *testing.T) {
+	source := []string{"grok-4.5"}
+	// nil service 静默跳过，仅保留已有来源。
+	require.Equal(t, source, mergePricingCatalogModels(source, nil, service.PlatformOpenAI))
+	// 未知展示平台同样跳过。
+	require.Equal(t, source, mergePricingCatalogModels(source, &service.PricingService{}, "unknown"))
+}
+
+func TestGatewayModels_CustomModelsListIncludesDisplayPricingCatalog(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	groupID := int64(43)
+	// grok 功能平台 + openai 展示平台：自定义列表来源并入 openai 定价目录
+	// （与渠道「同步最新模型」同源），列表里填 gpt-* 可通过过滤。
+	h := newGatewayModelsHandlerForTest(
+		&gatewayModelsAccountRepoStub{
+			byGroup: map[int64][]service.Account{
+				groupID: {
+					{ID: 1, Platform: service.PlatformGrok},
+				},
+			},
+		},
+	)
+	h.pricingService = newTestPricingService(t)
+
+	rec := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(rec)
+	c.Request = httptest.NewRequest(http.MethodGet, "/v1/models", nil)
+	c.Set(string(middleware2.ContextKeyAPIKey), &service.APIKey{
+		Group: &service.Group{
+			ID:              groupID,
+			Platform:        service.PlatformGrok,
+			DisplayPlatform: service.PlatformOpenAI,
+			ModelsListConfig: service.GroupModelsListConfig{
+				Enabled: true,
+				Models:  []string{"gpt-5.5", "missing-model"},
+			},
+		},
+	})
+
+	h.Models(c)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+
+	var got gatewayModelsResponseForTest
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &got))
+	// gpt-5.5 命中 openai 定价目录（LiteLLM 模型库）；missing-model 被过滤。
+	require.Equal(t, []string{"gpt-5.5"}, modelIDsForTest(got.Data))
+	require.Equal(t, "openai", got.Data[0].OwnedBy)
 }

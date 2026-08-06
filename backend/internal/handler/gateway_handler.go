@@ -53,6 +53,7 @@ type GatewayHandler struct {
 	securityAuditCoordinator  *securityaudit.Coordinator
 	concurrencyHelper         *ConcurrencyHelper
 	userMsgQueueHelper        *UserMsgQueueHelper
+	pricingService            *service.PricingService
 	maxAccountSwitches        int
 	maxAccountSwitchesGemini  int
 	cfg                       *config.Config
@@ -76,6 +77,7 @@ func NewGatewayHandler(
 	userMsgQueueService *service.UserMessageQueueService,
 	cfg *config.Config,
 	settingService *service.SettingService,
+	pricingService *service.PricingService,
 ) *GatewayHandler {
 	pingInterval := time.Duration(0)
 	maxAccountSwitches := 10
@@ -110,6 +112,7 @@ func NewGatewayHandler(
 		contentModerationService:  contentModerationService,
 		concurrencyHelper:         NewConcurrencyHelper(concurrencyService, SSEPingFormatClaude, pingInterval),
 		userMsgQueueHelper:        umqHelper,
+		pricingService:            pricingService,
 		maxAccountSwitches:        maxAccountSwitches,
 		maxAccountSwitchesGemini:  maxAccountSwitchesGemini,
 		cfg:                       cfg,
@@ -1111,10 +1114,12 @@ func (h *GatewayHandler) Models(c *gin.Context) {
 		}
 		fallbackModels := defaultModelIDsForPlatform(listPlatform)
 		source := customModelsListSource(listPlatform, availableModels, fallbackModels)
-		// 展示平台与功能平台不同时，允许来源并入展示平台默认模型，
-		// 使自定义列表可以填写展示品牌下的模型名（如 grok 分组展示为 openai 时填 gpt-*）。
+		// 展示平台与功能平台不同时，允许来源并入展示平台的默认模型与定价目录模型
+		// （定价目录与渠道「同步最新模型」同源，LiteLLM 模型库），使自定义列表可以
+		// 填写展示品牌下的模型名（如 grok 分组展示为 openai 时填 gpt-*）。
 		if listPlatform != platform {
 			source = mergeModelIDs(source, fallbackModels)
+			source = mergePricingCatalogModels(source, h.pricingService, listPlatform)
 		}
 		availableModels = filterModelsByCustomList(source, fallbackModels, apiKey.Group.ModelsListConfig.Models)
 		writeCustomModelsList(c, listPlatform, availableModels)
@@ -1402,6 +1407,29 @@ func defaultModelIDsForPlatform(platform string) []string {
 		}
 		return ids
 	}
+}
+
+// gatewayPlatformToLiteLLMProvider maps a group platform to the LiteLLM
+// provider key used by the pricing catalog（与渠道「同步最新模型」同源）。
+var gatewayPlatformToLiteLLMProvider = map[string]string{
+	service.PlatformAnthropic:   "anthropic",
+	service.PlatformOpenAI:      "openai",
+	service.PlatformGemini:      "google",
+	service.PlatformAntigravity: "anthropic",
+	service.PlatformGrok:        "xai",
+}
+
+// mergePricingCatalogModels 把展示平台的 LiteLLM 定价目录模型并入允许来源。
+// pricingService 为 nil（未注入/测试）时静默跳过，仅保留已有来源。
+func mergePricingCatalogModels(source []string, pricingService *service.PricingService, listPlatform string) []string {
+	if pricingService == nil {
+		return source
+	}
+	provider, ok := gatewayPlatformToLiteLLMProvider[listPlatform]
+	if !ok {
+		return source
+	}
+	return mergeModelIDs(source, pricingService.ListModelNamesByProvider(provider))
 }
 
 func mergeModelIDs(primary, secondary []string) []string {
