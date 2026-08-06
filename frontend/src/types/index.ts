@@ -545,6 +545,8 @@ export interface Group {
   name: string
   description: string | null
   platform: GroupPlatform
+  // 展示平台：仅影响用户侧图标/徽章/标签的展示品牌，不参与路由/计费；缺省时按 platform 展示。
+  display_platform?: GroupPlatform
   rate_multiplier: number
   rpm_limit?: number // Group-level RPM cap (0 = unlimited); overrides user-level rpm_limit when set
   max_reasoning_effort?: string // OpenAI/Codex reasoning ceiling; empty means unlimited
@@ -750,6 +752,8 @@ export interface CreateGroupRequest {
   name: string
   description?: string | null
   platform?: GroupPlatform
+  // 展示平台：仅影响用户侧图标/徽章/标签；空串=不覆盖
+  display_platform?: GroupPlatform | ''
   rate_multiplier?: number
   is_exclusive?: boolean
   subscription_type?: SubscriptionType
@@ -804,6 +808,8 @@ export interface UpdateGroupRequest {
   name?: string
   description?: string | null
   platform?: GroupPlatform
+  // 展示平台：仅影响用户侧图标/徽章/标签；空串=清除覆盖，缺省=不修改
+  display_platform?: GroupPlatform | ''
   rate_multiplier?: number
   is_exclusive?: boolean
   status?: 'active' | 'inactive'

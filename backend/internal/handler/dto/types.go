@@ -92,6 +92,8 @@ type Group struct {
 	Name           string  `json:"name"`
 	Description    string  `json:"description"`
 	Platform       string  `json:"platform"`
+	// 展示平台：仅影响用户侧图标/徽章/标签，空/缺省时按 platform 展示。
+	DisplayPlatform string `json:"display_platform,omitempty"`
 	RateMultiplier float64 `json:"rate_multiplier"`
 	IsExclusive    bool    `json:"is_exclusive"`
 	Status         string  `json:"status"`

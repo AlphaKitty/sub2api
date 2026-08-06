@@ -6,7 +6,7 @@
     ]"
   >
     <!-- Platform logo -->
-    <PlatformIcon v-if="platform" :platform="platform" size="sm" />
+    <PlatformIcon v-if="platform" :platform="effectivePlatform" size="sm" />
     <!-- Group name -->
     <span class="truncate">{{ name }}</span>
     <!-- Right side label -->
@@ -37,6 +37,8 @@ import PlatformIcon from './PlatformIcon.vue'
 interface Props {
   name: string
   platform?: GroupPlatform
+  /** 展示平台覆盖：仅影响图标/徽章/标签的展示品牌，缺省时按 platform 展示。 */
+  displayPlatform?: GroupPlatform
   subscriptionType?: SubscriptionType
   rateMultiplier?: number
   userRateMultiplier?: number | null // 用户专属倍率
@@ -55,6 +57,8 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  platform: 'anthropic',
+  displayPlatform: undefined,
   subscriptionType: 'standard',
   showRate: true,
   daysRemaining: null,
@@ -64,6 +68,9 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const { t } = useI18n()
+
+// 实际展示的平台：展示覆盖优先，缺省回退真实平台。
+const effectivePlatform = computed(() => props.displayPlatform || props.platform)
 
 const isSubscription = computed(() => props.subscriptionType === 'subscription')
 
@@ -147,22 +154,22 @@ const labelClass = computed(() => {
   }
 
   // 正常状态或无天数：根据平台显示主题色
-  if (props.platform === 'anthropic') {
+  if (effectivePlatform.value === 'anthropic') {
     return `${base} bg-orange-200/60 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300`
   }
-  if (props.platform === 'openai') {
+  if (effectivePlatform.value === 'openai') {
     return `${base} bg-emerald-200/60 text-emerald-800 dark:bg-emerald-800/40 dark:text-emerald-300`
   }
-  if (props.platform === 'gemini') {
+  if (effectivePlatform.value === 'gemini') {
     return `${base} bg-blue-200/60 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300`
   }
-  if (props.platform === 'antigravity') {
+  if (effectivePlatform.value === 'antigravity') {
     return `${base} bg-purple-200/60 text-purple-800 dark:bg-purple-800/40 dark:text-purple-300`
   }
-  if (props.platform === 'grok') {
+  if (effectivePlatform.value === 'grok') {
     return `${base} bg-zinc-300/70 text-zinc-800 dark:bg-zinc-700/60 dark:text-zinc-200`
   }
-  if (props.platform === 'composite') {
+  if (effectivePlatform.value === 'composite') {
     return `${base} bg-cyan-200/70 text-cyan-900 dark:bg-cyan-900/50 dark:text-cyan-300`
   }
   return `${base} bg-violet-200/60 text-violet-800 dark:bg-violet-800/40 dark:text-violet-300`
@@ -174,33 +181,33 @@ const peakRateClass = computed(() => {
 
 // Badge color based on platform and subscription type
 const badgeClass = computed(() => {
-  if (props.platform === 'anthropic') {
+  if (effectivePlatform.value === 'anthropic') {
     // Claude: orange theme
     return isSubscription.value
       ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
       : 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
-  } else if (props.platform === 'openai') {
+  } else if (effectivePlatform.value === 'openai') {
     // OpenAI: green theme
     return isSubscription.value
       ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
       : 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400'
   }
-  if (props.platform === 'gemini') {
+  if (effectivePlatform.value === 'gemini') {
     return isSubscription.value
       ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
       : 'bg-sky-50 text-sky-700 dark:bg-sky-900/20 dark:text-sky-400'
   }
-  if (props.platform === 'antigravity') {
+  if (effectivePlatform.value === 'antigravity') {
     return isSubscription.value
       ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
       : 'bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-900/20 dark:text-fuchsia-400'
   }
-  if (props.platform === 'grok') {
+  if (effectivePlatform.value === 'grok') {
     return isSubscription.value
       ? 'bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-100'
       : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200'
   }
-  if (props.platform === 'composite') {
+  if (effectivePlatform.value === 'composite') {
     return isSubscription.value
       ? 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300'
       : 'bg-cyan-50 text-cyan-800 dark:bg-cyan-900/20 dark:text-cyan-300'

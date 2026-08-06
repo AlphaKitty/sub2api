@@ -9,6 +9,7 @@
       <GroupBadge
         :name="name"
         :platform="platform"
+        :display-platform="displayPlatform"
         :subscription-type="subscriptionType"
         :show-rate="false"
         class="groupOptionItemBadge"
@@ -71,6 +72,8 @@ const { t } = useI18n()
 interface Props {
   name: string
   platform: GroupPlatform
+  /** 展示平台覆盖：仅影响徽章图标/颜色，缺省时按 platform 展示。 */
+  displayPlatform?: GroupPlatform
   subscriptionType?: SubscriptionType
   rateMultiplier?: number
   userRateMultiplier?: number | null
@@ -85,6 +88,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   subscriptionType: 'standard',
+  displayPlatform: undefined,
   selected: false,
   showCheckmark: true,
   userRateMultiplier: null,

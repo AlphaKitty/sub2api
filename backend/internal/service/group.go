@@ -20,6 +20,9 @@ type Group struct {
 	Name           string
 	Description    string
 	Platform       string
+	// DisplayPlatform 展示平台：仅影响用户侧图标/徽章/标签的展示品牌，
+	// 不参与路由、计费、账号池等任何功能行为。空串表示不覆盖。
+	DisplayPlatform string
 	RateMultiplier float64
 	// 高峰时段倍率：peak_rate_enabled 为 true 且当前时刻处于 [PeakStart, PeakEnd) 时，
 	// token 计费倍率额外乘以 PeakRateMultiplier。详见 PeakMultiplierAt。
@@ -360,6 +363,31 @@ func NormalizeGroupPlatform(platform string) string {
 		return PlatformAnthropic
 	}
 	return platform
+}
+
+// displayPlatformSupported 返回 platform 是否可作为分组的「展示平台」。
+// 仅五个具体平台允许（composite 是多平台聚合，作为展示平台会误导用户）。
+func displayPlatformSupported(platform string) bool {
+	switch platform {
+	case PlatformOpenAI, PlatformAnthropic, PlatformGemini, PlatformGrok, PlatformAntigravity:
+		return true
+	default:
+		return false
+	}
+}
+
+// NormalizeDisplayPlatform 归一化分组展示平台：
+//   - 空串 → 不覆盖（用户侧按真实 platform 展示）；
+//   - 非具体平台（如 composite）→ 重置为空；
+//   - 具体平台 → 原样返回。
+//
+// 展示平台仅影响用户侧图标/徽章/标签，不参与路由、计费、账号池等任何功能行为。
+func NormalizeDisplayPlatform(display string) string {
+	display = strings.TrimSpace(display)
+	if display == "" || !displayPlatformSupported(display) {
+		return ""
+	}
+	return display
 }
 
 // ValidateProfitControlConfig 是分组利润控制配置的唯一校验来源，handler 与 service 层共用。

@@ -448,6 +448,7 @@ func (s *adminServiceImpl) CreateGroup(ctx context.Context, input *CreateGroupIn
 		Name:                            input.Name,
 		Description:                     input.Description,
 		Platform:                        platform,
+		DisplayPlatform:                 NormalizeDisplayPlatform(derefGroupString(input.DisplayPlatform)),
 		RateMultiplier:                  input.RateMultiplier,
 		IsExclusive:                     input.IsExclusive,
 		Status:                          StatusActive,
@@ -533,6 +534,14 @@ func (s *adminServiceImpl) CreateGroup(ctx context.Context, input *CreateGroupIn
 	}
 
 	return group, nil
+}
+
+// derefGroupString 解引用可选字符串，nil 返回空串。
+func derefGroupString(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
 }
 
 // normalizeLimit 将负数转换为 nil（表示无限制），0 保留（表示限额为零）
@@ -634,6 +643,9 @@ func (s *adminServiceImpl) UpdateGroup(ctx context.Context, id int64, input *Upd
 	}
 	if input.Platform != "" {
 		group.Platform = input.Platform
+	}
+	if input.DisplayPlatform != nil {
+		group.DisplayPlatform = NormalizeDisplayPlatform(*input.DisplayPlatform)
 	}
 	if input.RateMultiplier != nil {
 		if *input.RateMultiplier <= 0 {

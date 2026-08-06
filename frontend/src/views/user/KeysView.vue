@@ -145,6 +145,7 @@
                   v-if="row.group"
                   :name="row.group.name"
                   :platform="row.group.platform"
+                  :display-platform="row.group.display_platform"
                   :subscription-type="row.group.subscription_type"
                   :rate-multiplier="row.group.rate_multiplier"
                   :user-rate-multiplier="userGroupRates[row.group.id]"
@@ -479,6 +480,7 @@
                 v-if="option"
                 :name="(option as unknown as GroupOption).label"
                 :platform="(option as unknown as GroupOption).platform"
+                :display-platform="(option as unknown as GroupOption).displayPlatform"
                 :subscription-type="(option as unknown as GroupOption).subscriptionType"
                 :rate-multiplier="(option as unknown as GroupOption).rate"
                 :user-rate-multiplier="(option as unknown as GroupOption).userRate"
@@ -493,6 +495,7 @@
               <GroupOptionItem
                 :name="(option as unknown as GroupOption).label"
                 :platform="(option as unknown as GroupOption).platform"
+                :display-platform="(option as unknown as GroupOption).displayPlatform"
                 :subscription-type="(option as unknown as GroupOption).subscriptionType"
                 :rate-multiplier="(option as unknown as GroupOption).rate"
                 :user-rate-multiplier="(option as unknown as GroupOption).userRate"
@@ -1092,6 +1095,7 @@
             <GroupOptionItem
               :name="option.label"
               :platform="option.platform"
+              :display-platform="option.displayPlatform"
               :subscription-type="option.subscriptionType"
               :rate-multiplier="option.rate"
               :user-rate-multiplier="option.userRate"
@@ -1169,6 +1173,7 @@ interface GroupOption {
   peakRateMultiplier: number
   subscriptionType: SubscriptionType
   platform: GroupPlatform
+  displayPlatform?: GroupPlatform
 }
 
 const appStore = useAppStore()
@@ -1420,7 +1425,8 @@ const groupOptions = computed(() =>
     peakEnd: group.peak_end,
     peakRateMultiplier: group.peak_rate_multiplier,
     subscriptionType: group.subscription_type,
-    platform: group.platform
+    platform: group.platform,
+    displayPlatform: group.display_platform
   }))
 )
 

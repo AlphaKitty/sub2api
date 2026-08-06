@@ -98,6 +98,7 @@
                   <GroupBadge
                     :name="g.name"
                     :platform="g.platform as GroupPlatform"
+                    :display-platform="displayPlatformOf(g)"
                     :subscription-type="(g.subscription_type || 'standard') as SubscriptionType"
                     :rate-multiplier="g.rate_multiplier"
                     :user-rate-multiplier="userGroupRates[g.id] ?? null"
@@ -132,6 +133,7 @@
                   <GroupBadge
                     :name="g.name"
                     :platform="g.platform as GroupPlatform"
+                    :display-platform="displayPlatformOf(g)"
                     :subscription-type="(g.subscription_type || 'standard') as SubscriptionType"
                     :rate-multiplier="g.rate_multiplier"
                     :user-rate-multiplier="userGroupRates[g.id] ?? null"
@@ -237,6 +239,7 @@
                         class="max-w-full"
                         :name="g.name"
                         :platform="g.platform as GroupPlatform"
+                        :display-platform="displayPlatformOf(g)"
                         :subscription-type="(g.subscription_type || 'standard') as SubscriptionType"
                         :rate-multiplier="g.rate_multiplier"
                         :user-rate-multiplier="userGroupRates[g.id] ?? null"
@@ -272,6 +275,7 @@
                         class="max-w-full"
                         :name="g.name"
                         :platform="g.platform as GroupPlatform"
+                        :display-platform="displayPlatformOf(g)"
                         :subscription-type="(g.subscription_type || 'standard') as SubscriptionType"
                         :rate-multiplier="g.rate_multiplier"
                         :user-rate-multiplier="userGroupRates[g.id] ?? null"
@@ -357,6 +361,11 @@ const { t } = useI18n()
 
 function exclusiveGroups(section: UserChannelPlatformSection): UserAvailableGroup[] {
   return section.groups.filter((g) => g.is_exclusive)
+}
+
+/** 分组展示平台覆盖：无覆盖时返回 undefined（GroupBadge 回退到真实平台）。 */
+function displayPlatformOf(g: UserAvailableGroup): GroupPlatform | undefined {
+  return (g.display_platform || undefined) as GroupPlatform | undefined
 }
 
 function publicGroups(section: UserChannelPlatformSection): UserAvailableGroup[] {

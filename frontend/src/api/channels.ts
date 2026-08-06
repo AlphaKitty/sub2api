@@ -10,6 +10,8 @@ export interface UserAvailableGroup {
   id: number
   name: string
   platform: string
+  /** 展示平台覆盖：仅影响用户侧图标/徽章/标签；缺省时按 platform 展示。 */
+  display_platform?: string
   /** 'standard' | 'subscription' — 订阅分组视觉加深，和 API 密钥页保持一致。 */
   subscription_type: string
   /** 分组默认倍率。用户专属倍率（若有）通过 /groups/rates 获取后在前端 join。 */

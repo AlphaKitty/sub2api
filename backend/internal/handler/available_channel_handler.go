@@ -55,6 +55,7 @@ type userAvailableGroup struct {
 	ID                 int64   `json:"id"`
 	Name               string  `json:"name"`
 	Platform           string  `json:"platform"`
+	DisplayPlatform    string  `json:"display_platform,omitempty"`
 	SubscriptionType   string  `json:"subscription_type"`
 	RateMultiplier     float64 `json:"rate_multiplier"`
 	PeakRateEnabled    bool    `json:"peak_rate_enabled"`
@@ -248,6 +249,7 @@ func filterUserVisibleGroups(
 			ID:                 g.ID,
 			Name:               g.Name,
 			Platform:           g.Platform,
+			DisplayPlatform:    g.DisplayPlatform,
 			SubscriptionType:   g.SubscriptionType,
 			RateMultiplier:     g.RateMultiplier,
 			PeakRateEnabled:    g.PeakRateEnabled,

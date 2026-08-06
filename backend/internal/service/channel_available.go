@@ -16,6 +16,7 @@ type AvailableGroupRef struct {
 	ID                 int64
 	Name               string
 	Platform           string
+	DisplayPlatform    string
 	SubscriptionType   string
 	RateMultiplier     float64
 	PeakRateEnabled    bool
@@ -66,6 +67,7 @@ func (s *ChannelService) ListAvailable(ctx context.Context) ([]AvailableChannel,
 			ID:                 g.ID,
 			Name:               g.Name,
 			Platform:           g.Platform,
+			DisplayPlatform:    g.DisplayPlatform,
 			SubscriptionType:   g.SubscriptionType,
 			RateMultiplier:     g.RateMultiplier,
 			PeakRateEnabled:    g.PeakRateEnabled,

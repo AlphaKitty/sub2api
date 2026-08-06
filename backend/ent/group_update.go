@@ -222,6 +222,26 @@ func (_u *GroupUpdate) SetNillablePlatform(v *string) *GroupUpdate {
 	return _u
 }
 
+// SetDisplayPlatform sets the "display_platform" field.
+func (_u *GroupUpdate) SetDisplayPlatform(v string) *GroupUpdate {
+	_u.mutation.SetDisplayPlatform(v)
+	return _u
+}
+
+// SetNillableDisplayPlatform sets the "display_platform" field if the given value is not nil.
+func (_u *GroupUpdate) SetNillableDisplayPlatform(v *string) *GroupUpdate {
+	if v != nil {
+		_u.SetDisplayPlatform(*v)
+	}
+	return _u
+}
+
+// ClearDisplayPlatform clears the value of the "display_platform" field.
+func (_u *GroupUpdate) ClearDisplayPlatform() *GroupUpdate {
+	_u.mutation.ClearDisplayPlatform()
+	return _u
+}
+
 // SetSubscriptionType sets the "subscription_type" field.
 func (_u *GroupUpdate) SetSubscriptionType(v string) *GroupUpdate {
 	_u.mutation.SetSubscriptionType(v)
@@ -1299,6 +1319,11 @@ func (_u *GroupUpdate) check() error {
 			return &ValidationError{Name: "platform", err: fmt.Errorf(`ent: validator failed for field "Group.platform": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.DisplayPlatform(); ok {
+		if err := group.DisplayPlatformValidator(v); err != nil {
+			return &ValidationError{Name: "display_platform", err: fmt.Errorf(`ent: validator failed for field "Group.display_platform": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.SubscriptionType(); ok {
 		if err := group.SubscriptionTypeValidator(v); err != nil {
 			return &ValidationError{Name: "subscription_type", err: fmt.Errorf(`ent: validator failed for field "Group.subscription_type": %w`, err)}
@@ -1379,6 +1404,12 @@ func (_u *GroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Platform(); ok {
 		_spec.SetField(group.FieldPlatform, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DisplayPlatform(); ok {
+		_spec.SetField(group.FieldDisplayPlatform, field.TypeString, value)
+	}
+	if _u.mutation.DisplayPlatformCleared() {
+		_spec.ClearField(group.FieldDisplayPlatform, field.TypeString)
 	}
 	if value, ok := _u.mutation.SubscriptionType(); ok {
 		_spec.SetField(group.FieldSubscriptionType, field.TypeString, value)
@@ -2112,6 +2143,26 @@ func (_u *GroupUpdateOne) SetNillablePlatform(v *string) *GroupUpdateOne {
 	if v != nil {
 		_u.SetPlatform(*v)
 	}
+	return _u
+}
+
+// SetDisplayPlatform sets the "display_platform" field.
+func (_u *GroupUpdateOne) SetDisplayPlatform(v string) *GroupUpdateOne {
+	_u.mutation.SetDisplayPlatform(v)
+	return _u
+}
+
+// SetNillableDisplayPlatform sets the "display_platform" field if the given value is not nil.
+func (_u *GroupUpdateOne) SetNillableDisplayPlatform(v *string) *GroupUpdateOne {
+	if v != nil {
+		_u.SetDisplayPlatform(*v)
+	}
+	return _u
+}
+
+// ClearDisplayPlatform clears the value of the "display_platform" field.
+func (_u *GroupUpdateOne) ClearDisplayPlatform() *GroupUpdateOne {
+	_u.mutation.ClearDisplayPlatform()
 	return _u
 }
 
@@ -3205,6 +3256,11 @@ func (_u *GroupUpdateOne) check() error {
 			return &ValidationError{Name: "platform", err: fmt.Errorf(`ent: validator failed for field "Group.platform": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.DisplayPlatform(); ok {
+		if err := group.DisplayPlatformValidator(v); err != nil {
+			return &ValidationError{Name: "display_platform", err: fmt.Errorf(`ent: validator failed for field "Group.display_platform": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.SubscriptionType(); ok {
 		if err := group.SubscriptionTypeValidator(v); err != nil {
 			return &ValidationError{Name: "subscription_type", err: fmt.Errorf(`ent: validator failed for field "Group.subscription_type": %w`, err)}
@@ -3302,6 +3358,12 @@ func (_u *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error)
 	}
 	if value, ok := _u.mutation.Platform(); ok {
 		_spec.SetField(group.FieldPlatform, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DisplayPlatform(); ok {
+		_spec.SetField(group.FieldDisplayPlatform, field.TypeString, value)
+	}
+	if _u.mutation.DisplayPlatformCleared() {
+		_spec.ClearField(group.FieldDisplayPlatform, field.TypeString)
 	}
 	if value, ok := _u.mutation.SubscriptionType(); ok {
 		_spec.SetField(group.FieldSubscriptionType, field.TypeString, value)

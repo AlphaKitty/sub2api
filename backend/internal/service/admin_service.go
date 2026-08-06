@@ -212,6 +212,8 @@ type CreateGroupInput struct {
 	Name             string
 	Description      string
 	Platform         string
+	// DisplayPlatform 展示平台：仅影响用户侧图标/徽章/标签，不参与路由/计费；空值=不覆盖。
+	DisplayPlatform *string
 	RateMultiplier   float64
 	IsExclusive      bool
 	SubscriptionType string   // standard/subscription
@@ -276,6 +278,8 @@ type UpdateGroupInput struct {
 	Name             string
 	Description      *string
 	Platform         string
+	// DisplayPlatform 展示平台：nil=不修改，空串=清除覆盖，非空=设置。
+	DisplayPlatform *string
 	RateMultiplier   *float64 // 使用指针以支持设置为0
 	IsExclusive      *bool
 	Status           string

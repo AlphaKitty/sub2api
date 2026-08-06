@@ -44,6 +44,8 @@ const (
 	FieldDuplicateOperationID = "duplicate_operation_id"
 	// FieldPlatform holds the string denoting the platform field in the database.
 	FieldPlatform = "platform"
+	// FieldDisplayPlatform holds the string denoting the display_platform field in the database.
+	FieldDisplayPlatform = "display_platform"
 	// FieldSubscriptionType holds the string denoting the subscription_type field in the database.
 	FieldSubscriptionType = "subscription_type"
 	// FieldDailyLimitUsd holds the string denoting the daily_limit_usd field in the database.
@@ -215,6 +217,7 @@ var Columns = []string{
 	FieldStatus,
 	FieldDuplicateOperationID,
 	FieldPlatform,
+	FieldDisplayPlatform,
 	FieldSubscriptionType,
 	FieldDailyLimitUsd,
 	FieldWeeklyLimitUsd,
@@ -319,6 +322,8 @@ var (
 	DefaultPlatform string
 	// PlatformValidator is a validator for the "platform" field. It is called by the builders before save.
 	PlatformValidator func(string) error
+	// DisplayPlatformValidator is a validator for the "display_platform" field. It is called by the builders before save.
+	DisplayPlatformValidator func(string) error
 	// DefaultSubscriptionType holds the default value on creation for the "subscription_type" field.
 	DefaultSubscriptionType string
 	// SubscriptionTypeValidator is a validator for the "subscription_type" field. It is called by the builders before save.
@@ -459,6 +464,11 @@ func ByDuplicateOperationID(opts ...sql.OrderTermOption) OrderOption {
 // ByPlatform orders the results by the platform field.
 func ByPlatform(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPlatform, opts...).ToFunc()
+}
+
+// ByDisplayPlatform orders the results by the display_platform field.
+func ByDisplayPlatform(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisplayPlatform, opts...).ToFunc()
 }
 
 // BySubscriptionType orders the results by the subscription_type field.

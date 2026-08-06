@@ -134,23 +134,33 @@
             >
           </template>
 
-          <template #cell-platform="{ value }">
-            <span
-              :class="[
-                'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium',
-                value === 'anthropic'
-                  ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-                  : value === 'openai'
-                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                    : value === 'antigravity'
-                      ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                      : value === 'grok'
-                        ? 'bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-100'
-                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-              ]"
-            >
-              <PlatformIcon :platform="value" size="xs" />
-              {{ t("admin.groups.platforms." + value) }}
+          <template #cell-platform="{ row }">
+            <span class="inline-flex flex-wrap items-center gap-1.5">
+              <span
+                :class="[
+                  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium',
+                  row.platform === 'anthropic'
+                    ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+                    : row.platform === 'openai'
+                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                      : row.platform === 'antigravity'
+                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                        : row.platform === 'grok'
+                          ? 'bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-100'
+                          : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                ]"
+              >
+                <PlatformIcon :platform="row.platform" size="xs" />
+                {{ t("admin.groups.platforms." + row.platform) }}
+              </span>
+              <span
+                v-if="row.display_platform && row.display_platform !== row.platform"
+                class="inline-flex items-center gap-1 rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-medium text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300"
+                :title="t('admin.groups.displayPlatformTooltip')"
+              >
+                <PlatformIcon :platform="row.display_platform" size="xs" />
+                {{ t("admin.groups.displaysAs", { platform: t("admin.groups.platforms." + row.display_platform) }) }}
+              </span>
             </span>
           </template>
 
@@ -501,6 +511,16 @@
             @change="createForm.copy_accounts_from_group_ids = []"
           />
           <p class="input-hint">{{ t("admin.groups.platformHint") }}</p>
+        </div>
+        <div>
+          <label class="input-label">{{ t("admin.groups.form.displayPlatform") }}</label>
+          <Select
+            v-model="createForm.display_platform"
+            :options="displayPlatformOptions"
+            :clearable="true"
+            :placeholder="t('admin.groups.form.displayPlatformPlaceholder')"
+          />
+          <p class="input-hint">{{ t("admin.groups.displayPlatformHint") }}</p>
         </div>
         <!-- 从分组复制账号 -->
         <div v-if="copyAccountsGroupOptions.length > 0">
@@ -2103,6 +2123,16 @@
             data-tour="group-form-platform"
           />
           <p class="input-hint">{{ t("admin.groups.platformNotEditable") }}</p>
+        </div>
+        <div>
+          <label class="input-label">{{ t("admin.groups.form.displayPlatform") }}</label>
+          <Select
+            v-model="editForm.display_platform"
+            :options="displayPlatformOptions"
+            :clearable="true"
+            :placeholder="t('admin.groups.form.displayPlatformPlaceholder')"
+          />
+          <p class="input-hint">{{ t("admin.groups.displayPlatformHint") }}</p>
         </div>
         <!-- 从分组复制账号（编辑时） -->
         <div v-if="copyAccountsGroupOptionsForEdit.length > 0">
@@ -4424,6 +4454,15 @@ const platformOptions = computed(() => [
   { value: "composite", label: "Composite" },
 ]);
 
+// 展示平台选项：仅五个具体平台（composite 是多平台聚合，不可作为展示品牌）。
+const displayPlatformOptions = computed(() => [
+  { value: "anthropic", label: "Anthropic" },
+  { value: "openai", label: "OpenAI" },
+  { value: "gemini", label: "Gemini" },
+  { value: "antigravity", label: "Antigravity" },
+  { value: "grok", label: "Grok" },
+]);
+
 const platformFilterOptions = computed(() => [
   { value: "", label: t("admin.groups.allPlatforms") },
   { value: "anthropic", label: "Anthropic" },
@@ -4716,6 +4755,7 @@ const createForm = reactive({
   name: "",
   description: "",
   platform: "anthropic" as GroupPlatform,
+  display_platform: "" as GroupPlatform | "",
   rate_multiplier: 1.0,
   is_exclusive: false,
   subscription_type: "standard" as SubscriptionType,
@@ -5069,6 +5109,7 @@ const editForm = reactive({
   name: "",
   description: "",
   platform: "anthropic" as GroupPlatform,
+  display_platform: "" as GroupPlatform | "",
   rate_multiplier: 1.0,
   is_exclusive: false,
   status: "active" as "active" | "inactive",
@@ -5730,6 +5771,7 @@ const handleEdit = async (group: AdminGroup) => {
   editForm.name = group.name;
   editForm.description = group.description || "";
   editForm.platform = group.platform;
+  editForm.display_platform = group.display_platform || "";
   editForm.rate_multiplier = group.rate_multiplier;
   editForm.is_exclusive = group.is_exclusive;
   editForm.status = group.status;

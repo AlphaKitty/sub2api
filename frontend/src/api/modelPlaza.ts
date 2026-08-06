@@ -30,6 +30,8 @@ export interface ModelPlazaGroup {
   name: string
   description: string
   platform: string
+  /** 展示平台覆盖：仅影响用户侧图标/徽章/标签；缺省时按 platform 展示。 */
+  display_platform?: string
   /** 'standard' | 'subscription' */
   subscription_type: string
   rate_multiplier: number

@@ -77,6 +77,13 @@ func (Group) Fields() []ent.Field {
 		field.String("platform").
 			MaxLen(50).
 			Default(domain.PlatformAnthropic),
+		// 展示平台：仅影响用户侧图标/徽章/标签的展示品牌，不影响路由、计费、账号池等功能行为。
+		// 空值表示不覆盖（用户侧按真实 platform 展示）。
+		field.String("display_platform").
+			MaxLen(50).
+			Optional().
+			Nillable().
+			Comment("展示平台（仅影响展示品牌，不参与功能路由）"),
 		field.String("subscription_type").
 			MaxLen(20).
 			Default(domain.SubscriptionTypeStandard),
