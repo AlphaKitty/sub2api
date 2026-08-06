@@ -5551,7 +5551,7 @@ const handleSort = (key: string, order: 'asc' | 'desc') => {
 
 const openCreateModal = () => {
   showCreateModal.value = true;
-  loadModelsListCandidates("create", 0, createForm.platform);
+  loadModelsListCandidates("create", 0, createForm.display_platform || createForm.platform);
 };
 
 const closeCreateModal = () => {
@@ -5847,7 +5847,7 @@ const handleEdit = async (group: AdminGroup) => {
   editModelRoutingRules.value = await convertApiFormatToRoutingRules(
     group.model_routing,
   );
-  loadModelsListCandidates("edit", group.id, group.platform);
+  loadModelsListCandidates("edit", group.id, group.display_platform || group.platform);
   showEditModal.value = true;
 };
 
@@ -6322,7 +6322,7 @@ watch(
     }
     resetDisabledBatchImagePricing(createForm);
     resetModelsListState(createModelsListState);
-    loadModelsListCandidates("create", 0, newVal);
+    loadModelsListCandidates("create", 0, createForm.display_platform || newVal);
   },
 );
 
@@ -6371,8 +6371,31 @@ watch(
     resetDisabledBatchImagePricing(editForm);
     if (editingGroup.value) {
       resetModelsListState(editModelsListState, editForm.platform === editingGroup.value.platform ? editingGroup.value.models_list_config : undefined);
-      loadModelsListCandidates("edit", editingGroup.value.id, newVal);
+      loadModelsListCandidates("edit", editingGroup.value.id, editForm.display_platform || newVal);
     }
+  },
+);
+
+watch(
+  () => createForm.display_platform,
+  () => {
+    // 模型列表候选跟随展示平台：切换展示平台时按有效平台重新加载。
+    resetModelsListState(createModelsListState);
+    loadModelsListCandidates("create", 0, createForm.display_platform || createForm.platform);
+  },
+);
+
+watch(
+  () => editForm.display_platform,
+  () => {
+    if (!editingGroup.value) return;
+    resetModelsListState(
+      editModelsListState,
+      editForm.display_platform === editingGroup.value.display_platform
+        ? editingGroup.value.models_list_config
+        : undefined,
+    );
+    loadModelsListCandidates("edit", editingGroup.value.id, editForm.display_platform || editForm.platform);
   },
 );
 
@@ -6465,7 +6488,7 @@ const saveSortOrder = async () => {
 onMounted(() => {
   loadGroups();
   void loadLiveCapability();
-  loadModelsListCandidates("create", 0, createForm.platform);
+  loadModelsListCandidates("create", 0, createForm.display_platform || createForm.platform);
   document.addEventListener("click", handleClickOutside);
 });
 
