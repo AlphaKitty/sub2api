@@ -1102,9 +1102,22 @@ func (h *GatewayHandler) Models(c *gin.Context) {
 	// Get available models from account configurations for the selected group platform.
 	availableModels := h.gatewayService.GetAvailableModels(c.Request.Context(), groupID, platform)
 	if apiKey != nil && apiKey.Group != nil && apiKey.Group.CustomModelsListEnabled() {
-		fallbackModels := defaultModelIDsForPlatform(platform)
-		availableModels = filterModelsByCustomList(customModelsListSource(platform, availableModels, fallbackModels), fallbackModels, apiKey.Group.ModelsListConfig.Models)
-		writeCustomModelsList(c, platform, availableModels)
+		// 自定义模型列表跟随对外展示平台：过滤来源（fallback）与输出格式均按
+		// display_platform 决定，让用户按展示品牌看到的模型列表与分组对外形象一致。
+		// 功能平台（路由/计费）仍是真实 platform，不受影响。
+		listPlatform := platform
+		if apiKey.Group.DisplayPlatform != "" && apiKey.Group.DisplayPlatform != service.PlatformComposite {
+			listPlatform = apiKey.Group.DisplayPlatform
+		}
+		fallbackModels := defaultModelIDsForPlatform(listPlatform)
+		source := customModelsListSource(listPlatform, availableModels, fallbackModels)
+		// 展示平台与功能平台不同时，允许来源并入展示平台默认模型，
+		// 使自定义列表可以填写展示品牌下的模型名（如 grok 分组展示为 openai 时填 gpt-*）。
+		if listPlatform != platform {
+			source = mergeModelIDs(source, fallbackModels)
+		}
+		availableModels = filterModelsByCustomList(source, fallbackModels, apiKey.Group.ModelsListConfig.Models)
+		writeCustomModelsList(c, listPlatform, availableModels)
 		return
 	}
 

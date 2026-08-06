@@ -703,3 +703,91 @@ func modelIDsForTest(models []gatewayModelItemForTest) []string {
 	}
 	return ids
 }
+
+func TestGatewayModels_CustomModelsListFollowsDisplayPlatform(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	groupID := int64(41)
+	// grok 功能平台 + openai 展示平台：自定义列表按展示品牌过滤与输出。
+	h := newGatewayModelsHandlerForTest(
+		&gatewayModelsAccountRepoStub{
+			byGroup: map[int64][]service.Account{
+				groupID: {
+					{ID: 1, Platform: service.PlatformGrok},
+				},
+			},
+		},
+	)
+
+	rec := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(rec)
+	c.Request = httptest.NewRequest(http.MethodGet, "/v1/models", nil)
+	c.Set(string(middleware2.ContextKeyAPIKey), &service.APIKey{
+		Group: &service.Group{
+			ID:              groupID,
+			Platform:        service.PlatformGrok,
+			DisplayPlatform: service.PlatformOpenAI,
+			ModelsListConfig: service.GroupModelsListConfig{
+				Enabled: true,
+				Models:  []string{"gpt-5.5", "grok-4.5", "missing-model"},
+			},
+		},
+	})
+
+	h.Models(c)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+
+	var got gatewayModelsResponseForTest
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &got))
+	// gpt-5.5 命中 openai 展示平台默认模型；grok-4.5 是 grok 账号真实可转发的模型（内置默认映射）也保留；
+	// missing-model 不存在被过滤。
+	require.Equal(t, []string{"gpt-5.5", "grok-4.5"}, modelIDsForTest(got.Data))
+	// 输出格式跟随展示平台（openai 形状）。
+	require.Equal(t, "model", got.Data[0].Object)
+	require.NotZero(t, got.Data[0].Created)
+	require.Equal(t, "openai", got.Data[0].OwnedBy)
+}
+
+func TestGatewayModels_CustomModelsListFollowsDisplayPlatformAnthropic(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	groupID := int64(42)
+	// grok 功能平台 + anthropic 展示平台：自定义列表可填 claude 官方模型名。
+	h := newGatewayModelsHandlerForTest(
+		&gatewayModelsAccountRepoStub{
+			byGroup: map[int64][]service.Account{
+				groupID: {
+					{ID: 1, Platform: service.PlatformGrok},
+				},
+			},
+		},
+	)
+
+	rec := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(rec)
+	c.Request = httptest.NewRequest(http.MethodGet, "/v1/models", nil)
+	c.Set(string(middleware2.ContextKeyAPIKey), &service.APIKey{
+		Group: &service.Group{
+			ID:              groupID,
+			Platform:        service.PlatformGrok,
+			DisplayPlatform: service.PlatformAnthropic,
+			ModelsListConfig: service.GroupModelsListConfig{
+				Enabled: true,
+				Models:  []string{"claude-sonnet-4-6", "gpt-5.5"},
+			},
+		},
+	})
+
+	h.Models(c)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+
+	var got gatewayModelsResponseForTest
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &got))
+	// claude-sonnet-4-6 命中 anthropic 展示平台默认模型；gpt-5.5 被过滤。
+	require.Equal(t, []string{"claude-sonnet-4-6"}, modelIDsForTest(got.Data))
+	// claude 形状：无 created/owned_by，created_at 为固定占位值。
+	require.Equal(t, "2024-01-01T00:00:00Z", got.Data[0].CreatedAt)
+	require.Zero(t, got.Data[0].Created)
+}
