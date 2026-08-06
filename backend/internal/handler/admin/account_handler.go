@@ -3008,3 +3008,60 @@ func sanitizeExtraBaseRPM(extra map[string]any) {
 	}
 	extra["base_rpm"] = v
 }
+
+// GetModelMappingTemplates 读取模型映射模板列表。
+// GET /api/v1/admin/accounts/model-mapping-templates
+func (h *AccountHandler) GetModelMappingTemplates(c *gin.Context) {
+	templates, err := h.adminService.GetModelMappingTemplates(c.Request.Context())
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, gin.H{"templates": templates})
+}
+
+// SaveModelMappingTemplates 全量保存模型映射模板（整体覆盖）。
+// PUT /api/v1/admin/accounts/model-mapping-templates
+func (h *AccountHandler) SaveModelMappingTemplates(c *gin.Context) {
+	var req struct {
+		Templates []service.ModelMappingTemplate `json:"templates"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+	for _, t := range req.Templates {
+		if strings.TrimSpace(t.Name) == "" {
+			response.BadRequest(c, "template name is required")
+			return
+		}
+		if t.ID == "" {
+			response.BadRequest(c, "template id is required")
+			return
+		}
+	}
+	if err := h.adminService.SaveModelMappingTemplates(c.Request.Context(), req.Templates); err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, gin.H{"message": "templates saved"})
+}
+
+// ApplyModelMappingTemplate 把模板映射全量替换到分组内所有账号的 model_mapping。
+// POST /api/v1/admin/accounts/apply-model-mapping-template
+func (h *AccountHandler) ApplyModelMappingTemplate(c *gin.Context) {
+	var req struct {
+		GroupID int64             `json:"group_id" binding:"required"`
+		Mapping map[string]string `json:"mapping" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+	result, err := h.adminService.ApplyModelMappingTemplate(c.Request.Context(), req.GroupID, req.Mapping)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, result)
+}

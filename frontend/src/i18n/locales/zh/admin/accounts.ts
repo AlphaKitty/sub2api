@@ -1381,5 +1381,35 @@ export default {
       }
     },
 
+    // 模型映射模板（账号管理-更多操作-工具）
+    modelMappingTemplates: {
+      title: '模型映射模板',
+      description: '维护常用的模型映射模板，并一键应用到指定分组下的所有账号（全量替换 model_mapping，不做合并）。',
+      manage: '模板管理',
+      newTemplate: '新建模板',
+      empty: '暂无模板，点击右上角新建',
+      entries: '条映射',
+      namePlaceholder: '模板名称，如：Claude→Grok 全量',
+      platformPlaceholder: '适用平台（可选）',
+      fromPlaceholder: '请求模型名（用户看到的）',
+      toPlaceholder: '上游模型名（实际转发）',
+      addRow: '添加映射行',
+      applyTitle: '一键应用到分组',
+      targetGroup: '目标分组',
+      selectGroupPlaceholder: '选择分组',
+      applyTemplate: '选择模板',
+      selectTemplatePlaceholder: '选择模板',
+      preview: '映射预览',
+      apply: '一键应用',
+      applyHint: '应用后该分组下所有账号的 model_mapping 将被模板整体替换，原有映射全部丢弃。',
+      applySuccess: '已应用：{count} 个账号更新成功',
+      applyPartial: '部分失败：成功 {success}，失败 {failed}',
+      saved: '模板已保存',
+      loadFailed: '加载模板失败',
+      loadGroupsFailed: '加载分组列表失败',
+      saveFailed: '保存模板失败',
+      applyFailed: '应用模板失败'
+    },
+
     // Scheduled Tests
 }

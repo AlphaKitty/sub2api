@@ -1405,5 +1405,35 @@ export default {
       usageError: 'Fetch Error'
     },
 
+    // Model mapping templates (Accounts - More actions - Tools)
+    modelMappingTemplates: {
+      title: 'Model Mapping Templates',
+      description: 'Maintain reusable model mapping templates and apply one to all accounts of a group (replaces model_mapping entirely, no merge).',
+      manage: 'Template Management',
+      newTemplate: 'New Template',
+      empty: 'No templates yet. Click “New Template” to create one.',
+      entries: 'entries',
+      namePlaceholder: 'Template name, e.g. Claude→Grok',
+      platformPlaceholder: 'Platform (optional)',
+      fromPlaceholder: 'Requested model (what users see)',
+      toPlaceholder: 'Upstream model (actual forward)',
+      addRow: 'Add mapping row',
+      applyTitle: 'Apply to Group',
+      targetGroup: 'Target group',
+      selectGroupPlaceholder: 'Select group',
+      applyTemplate: 'Template',
+      selectTemplatePlaceholder: 'Select template',
+      preview: 'Mapping preview',
+      apply: 'Apply',
+      applyHint: 'All accounts in the group will have their model_mapping fully replaced with this template.',
+      applySuccess: 'Applied: {count} account(s) updated',
+      applyPartial: 'Partial failure: {success} succeeded, {failed} failed',
+      saved: 'Templates saved',
+      loadFailed: 'Failed to load templates',
+      loadGroupsFailed: 'Failed to load groups',
+      saveFailed: 'Failed to save templates',
+      applyFailed: 'Failed to apply template'
+    },
+
     // Scheduled Tests
 }

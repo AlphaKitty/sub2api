@@ -357,6 +357,18 @@ func (s *stubAdminService) CreateGroup(ctx context.Context, input *service.Creat
 	return &group, nil
 }
 
+func (s *stubAdminService) GetModelMappingTemplates(ctx context.Context) ([]service.ModelMappingTemplate, error) {
+	return []service.ModelMappingTemplate{}, nil
+}
+
+func (s *stubAdminService) SaveModelMappingTemplates(ctx context.Context, templates []service.ModelMappingTemplate) error {
+	return nil
+}
+
+func (s *stubAdminService) ApplyModelMappingTemplate(ctx context.Context, groupID int64, mapping map[string]string) (*service.ModelMappingTemplateApplyResult, error) {
+	return &service.ModelMappingTemplateApplyResult{Results: []service.AccountApplyResultItem{}}, nil
+}
+
 func (s *stubAdminService) DuplicateGroup(ctx context.Context, id int64, actorScope, operationKey string) (*service.Group, error) {
 	group := service.Group{ID: 201, Name: "group (Copy)", Status: "inactive"}
 	return &group, nil

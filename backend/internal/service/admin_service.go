@@ -70,6 +70,10 @@ type AdminService interface {
 
 	// Account management
 	ListAccounts(ctx context.Context, page, pageSize int, platform, accountType, status, search string, groupID int64, privacyMode string, sortBy, sortOrder string) ([]Account, int64, error)
+	// 模型映射模板（账号管理-工具）：读取/全量保存模板，按分组全量替换账号 model_mapping。
+	GetModelMappingTemplates(ctx context.Context) ([]ModelMappingTemplate, error)
+	SaveModelMappingTemplates(ctx context.Context, templates []ModelMappingTemplate) error
+	ApplyModelMappingTemplate(ctx context.Context, groupID int64, mapping map[string]string) (*ModelMappingTemplateApplyResult, error)
 	// ListAccountsForSchedulerScoreFilter 返回符合过滤条件的全部账号（不分页），
 	// 作为账号列表页计算 OpenAI 调度分数的过滤范围池。
 	ListAccountsForSchedulerScoreFilter(ctx context.Context, platform, accountType, status, search string, groupID int64, privacyMode string) ([]Account, error)

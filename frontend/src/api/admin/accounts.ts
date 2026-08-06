@@ -970,6 +970,44 @@ export async function refreshOllamaCloudUsage(id: number): Promise<OllamaCloudUs
   return data
 }
 
+// ── 模型映射模板（账号管理-更多操作-工具）──
+
+export interface ModelMappingTemplate {
+  id: string
+  name: string
+  platform?: string
+  mapping: Record<string, string>
+}
+
+export interface ApplyModelMappingTemplateResult {
+  success: number
+  failed: number
+  results: Array<{ account_id: number; success: boolean; error?: string }>
+}
+
+/** 读取全部模型映射模板。 */
+export async function getModelMappingTemplates(): Promise<ModelMappingTemplate[]> {
+  const { data } = await apiClient.get<{ templates: ModelMappingTemplate[] }>('/admin/accounts/model-mapping-templates')
+  return data.templates ?? []
+}
+
+/** 全量保存模型映射模板（整体覆盖）。 */
+export async function saveModelMappingTemplates(templates: ModelMappingTemplate[]): Promise<void> {
+  await apiClient.put('/admin/accounts/model-mapping-templates', { templates })
+}
+
+/** 把模板映射全量替换到分组内所有账号的 model_mapping（不做合并/去重）。 */
+export async function applyModelMappingTemplate(
+  groupId: number,
+  mapping: Record<string, string>
+): Promise<ApplyModelMappingTemplateResult> {
+  const { data } = await apiClient.post<ApplyModelMappingTemplateResult>('/admin/accounts/apply-model-mapping-template', {
+    group_id: groupId,
+    mapping
+  })
+  return data
+}
+
 export const accountsAPI = {
   list,
   listWithEtag,
@@ -1029,7 +1067,10 @@ export const accountsAPI = {
   saveOllamaCloudUsageSession,
   deleteOllamaCloudUsageSession,
   setOllamaCloudUsageAutoRefresh,
-  refreshOllamaCloudUsage
+  refreshOllamaCloudUsage,
+  getModelMappingTemplates,
+  saveModelMappingTemplates,
+  applyModelMappingTemplate
 }
 
 export default accountsAPI
