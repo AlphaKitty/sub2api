@@ -1102,27 +1102,33 @@ func (h *GatewayHandler) Models(c *gin.Context) {
 		return
 	}
 
+	// 展示平台覆盖：/v1/models 模型列表完全跟随对外展示品牌。
+	// 无论是否启用自定义列表，用户看到的都是展示平台的模型（默认官方模型 ∪ 定价目录）；
+	// 功能平台（路由/计费）仍是真实 platform，不受影响。
+	if apiKey != nil && apiKey.Group != nil &&
+		apiKey.Group.DisplayPlatform != "" &&
+		apiKey.Group.DisplayPlatform != service.PlatformComposite &&
+		apiKey.Group.DisplayPlatform != platform {
+		listPlatform := apiKey.Group.DisplayPlatform
+		fallbackModels := defaultModelIDsForPlatform(listPlatform)
+		source := mergePricingCatalogModels(fallbackModels, h.pricingService, listPlatform)
+		if apiKey.Group.CustomModelsListEnabled() {
+			// 自定义列表在展示平台的允许来源内过滤（来源与「同步最新模型」同源）。
+			source = filterModelsByCustomList(source, fallbackModels, apiKey.Group.ModelsListConfig.Models)
+		} else {
+			// 未配置自定义列表：直接返回展示平台的模型列表。
+			source = append([]string(nil), source...)
+		}
+		writeCustomModelsList(c, listPlatform, source)
+		return
+	}
+
 	// Get available models from account configurations for the selected group platform.
 	availableModels := h.gatewayService.GetAvailableModels(c.Request.Context(), groupID, platform)
 	if apiKey != nil && apiKey.Group != nil && apiKey.Group.CustomModelsListEnabled() {
-		// 自定义模型列表跟随对外展示平台：过滤来源（fallback）与输出格式均按
-		// display_platform 决定，让用户按展示品牌看到的模型列表与分组对外形象一致。
-		// 功能平台（路由/计费）仍是真实 platform，不受影响。
-		listPlatform := platform
-		if apiKey.Group.DisplayPlatform != "" && apiKey.Group.DisplayPlatform != service.PlatformComposite {
-			listPlatform = apiKey.Group.DisplayPlatform
-		}
-		fallbackModels := defaultModelIDsForPlatform(listPlatform)
-		source := customModelsListSource(listPlatform, availableModels, fallbackModels)
-		// 展示平台与功能平台不同时，允许来源并入展示平台的默认模型与定价目录模型
-		// （定价目录与渠道「同步最新模型」同源，LiteLLM 模型库），使自定义列表可以
-		// 填写展示品牌下的模型名（如 grok 分组展示为 openai 时填 gpt-*）。
-		if listPlatform != platform {
-			source = mergeModelIDs(source, fallbackModels)
-			source = mergePricingCatalogModels(source, h.pricingService, listPlatform)
-		}
-		availableModels = filterModelsByCustomList(source, fallbackModels, apiKey.Group.ModelsListConfig.Models)
-		writeCustomModelsList(c, listPlatform, availableModels)
+		fallbackModels := defaultModelIDsForPlatform(platform)
+		availableModels = filterModelsByCustomList(customModelsListSource(platform, availableModels, fallbackModels), fallbackModels, apiKey.Group.ModelsListConfig.Models)
+		writeCustomModelsList(c, platform, availableModels)
 		return
 	}
 
