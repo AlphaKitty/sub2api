@@ -59,6 +59,22 @@ export default {
     addBalanceWithCode: '使用兑换码充值'
   },
 
+  // 每日签到（check-in）
+  checkin: {
+    title: '每日签到',
+    day: '第{n}天',
+    streakDays: '已连续 {days} 天',
+    button: '立即签到',
+    checked: '今日已签到',
+    submitting: '签到中…',
+    todayReward: '今日签到可得 {reward}',
+    doneToday: '今日已得 {reward}，明天继续！',
+    regAgeLock: '注册满 {hours} 小时后即可签到',
+    monthlyCapReached: '本月签到奖励已达上限，下月再来',
+    success: '签到成功！获得 {reward}（已连续 {streak} 天）',
+    error: '签到失败，请稍后再试'
+  },
+
   // Groups (shared)
   groups: {
     subscription: '订阅'

@@ -133,7 +133,7 @@
                         </span>
                         <span class="flex-1 text-left">{{ t('admin.tlsFingerprintProfiles.title') }}</span>
                       </button>
-                      <button class="account-tools-menu-item" @click="showModelMappingTemplates = true">
+                      <button class="account-tools-menu-item" @click="openModelMappingTemplates">
                         <span class="account-tools-menu-icon bg-teal-50 text-teal-600 dark:bg-teal-900/30 dark:text-teal-300">
                           <Icon name="swap" size="sm" />
                         </span>
@@ -1283,6 +1283,11 @@ const openErrorPassthrough = () => {
 const openTLSFingerprintProfiles = () => {
   closeAccountToolsDropdown()
   showTLSFingerprintProfiles.value = true
+}
+
+const openModelMappingTemplates = () => {
+  closeAccountToolsDropdown()
+  showModelMappingTemplates.value = true
 }
 
 const syncPendingListChanges = async () => {

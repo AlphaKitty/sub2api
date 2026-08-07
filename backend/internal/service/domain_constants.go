@@ -197,6 +197,12 @@ const (
 	// 面板 API 限流设置（JSON：PanelRateLimitSettings）
 	SettingKeyPanelRateLimitSettings = "panel_rate_limit_settings"
 
+	// 签到赠送额度设置
+	SettingKeyCheckInEnabled          = "checkin_enabled"              // 签到功能总开关（默认开）
+	SettingKeyCheckInRewards          = "checkin_rewards"              // 7 天周期奖励表（JSON 数组，USD）
+	SettingKeyCheckInMinRegAgeHours   = "checkin_min_reg_age_hours"    // 注册满 N 小时才能签到（防注册机，默认 24）
+	SettingKeyCheckInMaxMonthlyAmount = "checkin_max_monthly_amount"   // 月累计奖励封顶（USD，0=不限制）
+
 	// 操作审计日志设置
 	SettingKeyAuditLogRetentionDays = "audit_log_retention_days" // 审计日志保留天数（<=0 永久保留），默认 180
 

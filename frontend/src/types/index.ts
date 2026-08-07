@@ -2321,6 +2321,31 @@ export interface UpdateScheduledTestPlanRequest {
   auto_recover?: boolean
 }
 
+// Check-in (每日签到) types
+// 签到奖励直接入账余额（USD），7 天周期表循环发放
+export interface CheckInStatus {
+  enabled: boolean
+  today_checked: boolean
+  can_check_in: boolean
+  /** 已签 = 含今天；未签 = 截至昨天的连续天数 */
+  streak_days: number
+  /** 已签 = 实得金额；未签 = 今天可得金额 */
+  today_reward: number
+  /** 完整 7 天奖励周期表（USD） */
+  rewards: number[]
+  /** 未达注册门槛时的剩余小时（0 = 已达标） */
+  reg_age_remaining_hours: number
+  /** 月累计奖励剩余额度（-1 = 不限制） */
+  monthly_cap_remaining: number
+}
+
+export interface CheckInResult {
+  check_in_date: string
+  reward: number
+  streak_days: number
+  balance_after: number
+}
+
 // Payment types
 export type { SubscriptionPlan, PaymentOrder, CheckoutInfoResponse } from './payment'
 

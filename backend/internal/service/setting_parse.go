@@ -206,6 +206,12 @@ func (s *SettingService) InitializeDefaultSettings(ctx context.Context) error {
 		SettingKeyAffiliateEnabled:              "false",
 		SettingKeyAffiliateAdminRechargeEnabled: strconv.FormatBool(AdminRechargeRebateEnabledDefault),
 
+		// 签到赠送额度（默认开启；奖励金额小而克制，管理员可随时关闭/调整）
+		SettingKeyCheckInEnabled:          "true",
+		SettingKeyCheckInRewards:          "[0.02,0.02,0.03,0.03,0.04,0.05,0.10]",
+		SettingKeyCheckInMinRegAgeHours:   strconv.Itoa(DefaultCheckInMinRegAgeHours),
+		SettingKeyCheckInMaxMonthlyAmount: strconv.FormatFloat(DefaultCheckInMaxMonthlyAmount, 'f', 8, 64),
+
 		// 风控中心功能（默认关闭，显式启用）
 		SettingKeyRiskControlEnabled: "false",
 

@@ -793,6 +793,42 @@ var (
 			},
 		},
 	}
+	// CheckInRecordsColumns holds the columns for the "check_in_records" table.
+	CheckInRecordsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "check_in_date", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "streak_days", Type: field.TypeInt, Default: 1},
+		{Name: "reward_amount", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "user_id", Type: field.TypeInt64},
+	}
+	// CheckInRecordsTable holds the schema information for the "check_in_records" table.
+	CheckInRecordsTable = &schema.Table{
+		Name:       "check_in_records",
+		Columns:    CheckInRecordsColumns,
+		PrimaryKey: []*schema.Column{CheckInRecordsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "check_in_records_users_check_in_records",
+				Columns:    []*schema.Column{CheckInRecordsColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "checkinrecord_user_id_check_in_date",
+				Unique:  true,
+				Columns: []*schema.Column{CheckInRecordsColumns[6], CheckInRecordsColumns[3]},
+			},
+			{
+				Name:    "checkinrecord_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{CheckInRecordsColumns[6]},
+			},
+		},
+	}
 	// CompositeModelRoutesColumns holds the columns for the "composite_model_routes" table.
 	CompositeModelRoutesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
@@ -2081,6 +2117,7 @@ var (
 		ChannelMonitorDailyRollupsTable,
 		ChannelMonitorHistoriesTable,
 		ChannelMonitorRequestTemplatesTable,
+		CheckInRecordsTable,
 		CompositeModelRoutesTable,
 		ErrorPassthroughRulesTable,
 		GroupsTable,
@@ -2164,6 +2201,10 @@ func init() {
 	}
 	ChannelMonitorRequestTemplatesTable.Annotation = &entsql.Annotation{
 		Table: "channel_monitor_request_templates",
+	}
+	CheckInRecordsTable.ForeignKeys[0].RefTable = UsersTable
+	CheckInRecordsTable.Annotation = &entsql.Annotation{
+		Table: "check_in_records",
 	}
 	CompositeModelRoutesTable.ForeignKeys[0].RefTable = GroupsTable
 	CompositeModelRoutesTable.Annotation = &entsql.Annotation{

@@ -59,6 +59,22 @@ export default {
     addBalanceWithCode: 'Add balance with a code'
   },
 
+  // Daily check-in
+  checkin: {
+    title: 'Daily Check-in',
+    day: 'Day {n}',
+    streakDays: '{days}-day streak',
+    button: 'Check In',
+    checked: 'Checked in today',
+    submitting: 'Checking in…',
+    todayReward: 'Earn {reward} today',
+    doneToday: 'Earned {reward} today. Come back tomorrow!',
+    regAgeLock: 'Check-in unlocks {hours}h after signup',
+    monthlyCapReached: 'Monthly check-in cap reached. See you next month!',
+    success: 'Checked in! +{reward} ({streak}-day streak)',
+    error: 'Check-in failed, please try again'
+  },
+
   // Groups (shared)
   groups: {
     subscription: 'Sub'
