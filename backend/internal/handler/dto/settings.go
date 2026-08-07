@@ -164,6 +164,10 @@ type SystemSettings struct {
 
 	DefaultConcurrency           int                          `json:"default_concurrency"`
 	DefaultBalance               float64                      `json:"default_balance"`
+	CheckInEnabled               bool                         `json:"checkin_enabled"`
+	CheckInRewards               []float64                    `json:"checkin_rewards"`
+	CheckInMinRegAgeHours        int                          `json:"checkin_min_reg_age_hours"`
+	CheckInMaxMonthlyAmount      float64                      `json:"checkin_max_monthly_amount"`
 	AffiliateRebateRate          float64                      `json:"affiliate_rebate_rate"`
 	AffiliateRebateFreezeHours   int                          `json:"affiliate_rebate_freeze_hours"`
 	AffiliateRebateDurationDays  int                          `json:"affiliate_rebate_duration_days"`

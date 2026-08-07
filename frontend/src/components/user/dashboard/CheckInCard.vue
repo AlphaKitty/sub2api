@@ -1,78 +1,80 @@
 <template>
   <div v-if="status?.enabled" class="card overflow-hidden">
-    <!-- 头部 -->
-    <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
-      <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('checkin.title') }}</h2>
-        <span v-if="status.streak_days > 0" class="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-          🔥 {{ t('checkin.streakDays', { days: status.streak_days }) }}
-        </span>
-      </div>
-    </div>
-
-    <div class="space-y-4 p-4">
-      <!-- 7 天周期奖励条 -->
-      <div class="flex items-end justify-between gap-1">
-        <div
-          v-for="(reward, i) in status.rewards"
-          :key="i"
-          class="flex flex-1 flex-col items-center gap-1"
-        >
-          <div
-            class="flex h-8 w-full items-center justify-center rounded-lg text-xs font-semibold transition-all"
-            :class="pillClass(i)"
+    <div class="flex flex-col gap-5 p-5 lg:flex-row lg:items-center lg:gap-8">
+      <!-- 左侧：标题 / 状态 / 按钮 -->
+      <div class="shrink-0 space-y-2.5 lg:w-72">
+        <div class="flex items-center gap-2">
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('checkin.title') }}</h2>
+          <span
+            v-if="status.streak_days > 0"
+            class="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
           >
-            <span v-if="isDone(i)" class="text-white">✓</span>
-            <span v-else-if="isToday(i)" class="text-white">{{ formatReward(reward) }}</span>
-            <span v-else class="text-gray-500 dark:text-dark-400">{{ formatReward(reward) }}</span>
+            🔥 {{ t('checkin.streakDays', { days: status.streak_days }) }}
+          </span>
+        </div>
+
+        <p class="text-sm text-gray-500 dark:text-dark-400">
+          <template v-if="status.today_checked">
+            {{ t('checkin.doneToday', { reward: formatReward(status.today_reward) }) }}
+          </template>
+          <template v-else-if="status.reg_age_remaining_hours > 0">
+            {{ t('checkin.regAgeLock', { hours: status.reg_age_remaining_hours }) }}
+          </template>
+          <template v-else-if="status.monthly_cap_remaining === 0">
+            {{ t('checkin.monthlyCapReached') }}
+          </template>
+          <template v-else>
+            {{ t('checkin.todayReward', { reward: formatReward(status.today_reward) }) }}
+          </template>
+        </p>
+
+        <button
+          :disabled="!status.can_check_in || submitting"
+          class="w-full rounded-xl py-2.5 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto lg:px-8"
+          :class="
+            status.today_checked
+              ? 'bg-gray-100 text-gray-500 dark:bg-dark-800 dark:text-dark-400'
+              : 'bg-primary-600 text-white shadow-sm hover:bg-primary-700 active:scale-[0.98]'
+          "
+          @click="doCheckIn"
+        >
+          <span v-if="submitting">{{ t('checkin.submitting') }}</span>
+          <span v-else-if="status.today_checked">{{ t('checkin.checked') }}</span>
+          <span v-else>{{ t('checkin.button') }}</span>
+        </button>
+
+        <Transition name="fade">
+          <p v-if="successMessage" class="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400">
+            {{ successMessage }}
+          </p>
+        </Transition>
+        <Transition name="fade">
+          <p v-if="errorMessage" class="rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-600 dark:bg-red-900/20 dark:text-red-400">
+            {{ errorMessage }}
+          </p>
+        </Transition>
+      </div>
+
+      <!-- 右侧：7 天周期奖励条 -->
+      <div class="min-w-0 flex-1">
+        <div class="flex items-end justify-between gap-1.5 sm:gap-2">
+          <div
+            v-for="(reward, i) in status.rewards"
+            :key="i"
+            class="flex min-w-0 flex-1 flex-col items-center gap-1.5"
+          >
+            <div
+              class="flex h-9 w-full items-center justify-center rounded-lg text-xs font-semibold transition-all sm:h-10"
+              :class="pillClass(i)"
+            >
+              <span v-if="isDone(i)" class="text-white">✓</span>
+              <span v-else-if="isToday(i)" class="text-white">{{ formatReward(reward) }}</span>
+              <span v-else class="truncate text-gray-500 dark:text-dark-400">{{ formatReward(reward) }}</span>
+            </div>
+            <span class="text-[10px] text-gray-400 dark:text-dark-500">{{ t('checkin.day', { n: i + 1 }) }}</span>
           </div>
-          <span class="text-[10px] text-gray-400 dark:text-dark-500">{{ t('checkin.day', { n: i + 1 }) }}</span>
         </div>
       </div>
-
-      <!-- 状态文案 -->
-      <p class="text-center text-xs text-gray-500 dark:text-dark-400">
-        <template v-if="status.today_checked">
-          {{ t('checkin.doneToday', { reward: formatReward(status.today_reward) }) }}
-        </template>
-        <template v-else-if="status.reg_age_remaining_hours > 0">
-          {{ t('checkin.regAgeLock', { hours: status.reg_age_remaining_hours }) }}
-        </template>
-        <template v-else-if="status.monthly_cap_remaining === 0">
-          {{ t('checkin.monthlyCapReached') }}
-        </template>
-        <template v-else>
-          {{ t('checkin.todayReward', { reward: formatReward(status.today_reward) }) }}
-        </template>
-      </p>
-
-      <!-- 签到按钮 -->
-      <button
-        :disabled="!status.can_check_in || submitting"
-        class="w-full rounded-xl py-2.5 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60"
-        :class="
-          status.today_checked
-            ? 'bg-gray-100 text-gray-500 dark:bg-dark-800 dark:text-dark-400'
-            : 'bg-primary-600 text-white shadow-sm hover:bg-primary-700 active:scale-[0.98]'
-        "
-        @click="doCheckIn"
-      >
-        <span v-if="submitting">{{ t('checkin.submitting') }}</span>
-        <span v-else-if="status.today_checked">{{ t('checkin.checked') }}</span>
-        <span v-else>{{ t('checkin.button') }}</span>
-      </button>
-
-      <!-- 签到成功提示 -->
-      <Transition name="fade">
-        <p v-if="successMessage" class="rounded-lg bg-emerald-50 px-3 py-2 text-center text-xs font-medium text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400">
-          {{ successMessage }}
-        </p>
-      </Transition>
-      <Transition name="fade">
-        <p v-if="errorMessage" class="rounded-lg bg-red-50 px-3 py-2 text-center text-xs font-medium text-red-600 dark:bg-red-900/20 dark:text-red-400">
-          {{ errorMessage }}
-        </p>
-      </Transition>
     </div>
   </div>
 </template>

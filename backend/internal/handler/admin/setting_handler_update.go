@@ -170,6 +170,11 @@ type UpdateSettingsRequest struct {
 	// 默认配置
 	DefaultConcurrency                        int                               `json:"default_concurrency"`
 	DefaultBalance                            float64                           `json:"default_balance"`
+	// 签到赠送额度（用户默认值；值类型 → 未发送时自动 omitted 保持现值）
+	CheckInEnabled                            bool                              `json:"checkin_enabled"`
+	CheckInRewards                            []float64                         `json:"checkin_rewards"`
+	CheckInMinRegAgeHours                     int                               `json:"checkin_min_reg_age_hours"`
+	CheckInMaxMonthlyAmount                   float64                           `json:"checkin_max_monthly_amount"`
 	AffiliateRebateRate                       *float64                          `json:"affiliate_rebate_rate"`
 	AffiliateRebateFreezeHours                *int                              `json:"affiliate_rebate_freeze_hours"`
 	AffiliateRebateDurationDays               *int                              `json:"affiliate_rebate_duration_days"`
@@ -543,6 +548,25 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 	}
 	if req.DefaultBalance < 0 {
 		req.DefaultBalance = 0
+	}
+	// 签到奖励清洗：空表回退默认，负数条目替换为默认周期对应位，避免写坏签到配置
+	if len(req.CheckInRewards) == 0 {
+		req.CheckInRewards = service.DefaultCheckInRewards
+	}
+	cleanedCheckInRewards := make([]float64, 0, len(req.CheckInRewards))
+	for i, r := range req.CheckInRewards {
+		if r <= 0 {
+			cleanedCheckInRewards = append(cleanedCheckInRewards, service.DefaultCheckInRewards[i%len(service.DefaultCheckInRewards)])
+		} else {
+			cleanedCheckInRewards = append(cleanedCheckInRewards, r)
+		}
+	}
+	req.CheckInRewards = cleanedCheckInRewards
+	if req.CheckInMinRegAgeHours < 0 {
+		req.CheckInMinRegAgeHours = service.DefaultCheckInMinRegAgeHours
+	}
+	if req.CheckInMaxMonthlyAmount < 0 {
+		req.CheckInMaxMonthlyAmount = 0 // 0 = 不限制
 	}
 	affiliateRebateRate := previousSettings.AffiliateRebateRate
 	if req.AffiliateRebateRate != nil {
@@ -1606,6 +1630,10 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		CustomEndpoints:                        customEndpointsJSON,
 		DefaultConcurrency:                     req.DefaultConcurrency,
 		DefaultBalance:                         req.DefaultBalance,
+		CheckInEnabled:                         req.CheckInEnabled,
+		CheckInRewards:                         req.CheckInRewards,
+		CheckInMinRegAgeHours:                  req.CheckInMinRegAgeHours,
+		CheckInMaxMonthlyAmount:                req.CheckInMaxMonthlyAmount,
 		AffiliateRebateRate:                    affiliateRebateRate,
 		AffiliateRebateFreezeHours:             affiliateRebateFreezeHours,
 		AffiliateRebateDurationDays:            affiliateRebateDurationDays,
@@ -2214,6 +2242,10 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		CustomEndpoints:                                        dto.ParseCustomEndpoints(updatedSettings.CustomEndpoints),
 		DefaultConcurrency:                                     updatedSettings.DefaultConcurrency,
 		DefaultBalance:                                         updatedSettings.DefaultBalance,
+		CheckInEnabled:                                         updatedSettings.CheckInEnabled,
+		CheckInRewards:                                         updatedSettings.CheckInRewards,
+		CheckInMinRegAgeHours:                                  updatedSettings.CheckInMinRegAgeHours,
+		CheckInMaxMonthlyAmount:                                updatedSettings.CheckInMaxMonthlyAmount,
 		AffiliateRebateRate:                                    updatedSettings.AffiliateRebateRate,
 		AffiliateRebateFreezeHours:                             updatedSettings.AffiliateRebateFreezeHours,
 		AffiliateRebateDurationDays:                            updatedSettings.AffiliateRebateDurationDays,

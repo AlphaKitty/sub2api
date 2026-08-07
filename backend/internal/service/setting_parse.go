@@ -393,6 +393,27 @@ func (s *SettingService) parseSettings(settings map[string]string) *SystemSettin
 	} else {
 		result.DefaultBalance = s.cfg.Default.UserBalance
 	}
+
+	// 签到赠送额度（回退默认值；与 check_in.go 的 loadConfig 语义一致）
+	result.CheckInEnabled = settings[SettingKeyCheckInEnabled] != "false"
+	result.CheckInRewards = DefaultCheckInRewards
+	if raw, ok := settings[SettingKeyCheckInRewards]; ok && raw != "" {
+		var rewards []float64
+		if err := json.Unmarshal([]byte(raw), &rewards); err == nil && len(rewards) > 0 {
+			result.CheckInRewards = rewards
+		}
+	}
+	if v, err := strconv.Atoi(settings[SettingKeyCheckInMinRegAgeHours]); err == nil && v >= 0 {
+		result.CheckInMinRegAgeHours = v
+	} else {
+		result.CheckInMinRegAgeHours = DefaultCheckInMinRegAgeHours
+	}
+	if v, err := strconv.ParseFloat(settings[SettingKeyCheckInMaxMonthlyAmount], 64); err == nil && v >= 0 {
+		result.CheckInMaxMonthlyAmount = v
+	} else {
+		result.CheckInMaxMonthlyAmount = DefaultCheckInMaxMonthlyAmount
+	}
+
 	if rebateRate, err := strconv.ParseFloat(settings[SettingKeyAffiliateRebateRate], 64); err == nil {
 		result.AffiliateRebateRate = clampAffiliateRebateRate(rebateRate)
 	} else {

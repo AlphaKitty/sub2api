@@ -165,6 +165,13 @@ type SystemSettings struct {
 
 	DefaultConcurrency           int
 	DefaultBalance               float64
+
+	// 签到赠送额度（用户默认值）
+	CheckInEnabled          bool      // 签到功能总开关
+	CheckInRewards          []float64 // 7 天周期奖励表（USD）
+	CheckInMinRegAgeHours   int       // 注册满 N 小时才能签到
+	CheckInMaxMonthlyAmount float64   // 月累计奖励封顶（0=不限制）
+
 	RiskControlEnabled           bool
 	CyberSessionBlockEnabled     bool
 	CyberSessionBlockTTLSeconds  int

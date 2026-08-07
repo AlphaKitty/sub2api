@@ -3795,6 +3795,82 @@
                 <div class="mb-3 flex items-center justify-between">
                   <div>
                     <label class="font-medium text-gray-900 dark:text-white">
+                      {{ t("admin.settings.defaults.checkInTitle") }}
+                    </label>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      {{ t("admin.settings.defaults.checkInDescription") }}
+                    </p>
+                  </div>
+                  <Toggle v-model="form.checkin_enabled" data-testid="checkin-enabled-toggle" />
+                </div>
+
+                <!-- 7 天周期奖励表 -->
+                <div class="grid grid-cols-7 gap-2">
+                  <div v-for="(_, i) in checkInRewardSlots" :key="i">
+                    <label class="mb-1 block text-center text-xs font-medium text-gray-500 dark:text-gray-400">
+                      {{ t("admin.settings.defaults.checkInDay", { n: i + 1 }) }}
+                    </label>
+                    <div class="relative">
+                      <span class="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500">$</span>
+                      <input
+                        v-model.number="form.checkin_rewards[i]"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        class="input pl-6 text-center text-sm"
+                        :disabled="!form.checkin_enabled"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  {{ t("admin.settings.defaults.checkInRewardsHint") }}
+                </p>
+
+                <!-- 风控参数 -->
+                <div class="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {{ t("admin.settings.defaults.checkInMinRegAge") }}
+                    </label>
+                    <input
+                      v-model.number="form.checkin_min_reg_age_hours"
+                      type="number"
+                      min="0"
+                      step="1"
+                      class="input"
+                      :disabled="!form.checkin_enabled"
+                    />
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                      {{ t("admin.settings.defaults.checkInMinRegAgeHint") }}
+                    </p>
+                  </div>
+                  <div>
+                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {{ t("admin.settings.defaults.checkInMaxMonthly") }}
+                    </label>
+                    <div class="relative">
+                      <span class="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500">$</span>
+                      <input
+                        v-model.number="form.checkin_max_monthly_amount"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        class="input pl-6"
+                        :disabled="!form.checkin_enabled"
+                      />
+                    </div>
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                      {{ t("admin.settings.defaults.checkInMaxMonthlyHint") }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="border-t border-gray-100 pt-4 dark:border-dark-700">
+                <div class="mb-3 flex items-center justify-between">
+                  <div>
+                    <label class="font-medium text-gray-900 dark:text-white">
                       {{ t("admin.settings.defaults.defaultSubscriptions") }}
                     </label>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -9228,6 +9304,10 @@ const form = reactive<SettingsForm>({
   login_agreement_updated_at: "2026-03-31",
   login_agreement_documents: defaultLoginAgreementDocuments(),
   default_balance: 0,
+  checkin_enabled: true,
+  checkin_rewards: [0.02, 0.02, 0.03, 0.03, 0.04, 0.05, 0.1],
+  checkin_min_reg_age_hours: 24,
+  checkin_max_monthly_amount: 0,
   default_platform_quotas: normalizePlatformQuotasMap() as DefaultPlatformQuotasMap,
   affiliate_rebate_rate: 20,
   affiliate_rebate_freeze_hours: 0,
@@ -10614,6 +10694,9 @@ function addDefaultSubscription() {
   });
 }
 
+// 签到奖励周期固定 7 个槽位（第 7 天为大奖日，循环发放）
+const checkInRewardSlots = computed(() => [0, 1, 2, 3, 4, 5, 6])
+
 function removeDefaultSubscription(index: number) {
   form.default_subscriptions.splice(index, 1);
 }
@@ -10824,6 +10907,10 @@ async function saveSettings() {
       login_agreement_updated_at: form.login_agreement_updated_at,
       login_agreement_documents: form.login_agreement_documents,
       default_balance: form.default_balance,
+      checkin_enabled: form.checkin_enabled,
+      checkin_rewards: form.checkin_rewards,
+      checkin_min_reg_age_hours: Math.max(0, Number(form.checkin_min_reg_age_hours) || 24),
+      checkin_max_monthly_amount: Math.max(0, Number(form.checkin_max_monthly_amount) || 0),
       affiliate_rebate_rate: Math.min(
         100,
         Math.max(0, Number(form.affiliate_rebate_rate) || 0),

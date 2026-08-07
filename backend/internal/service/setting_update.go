@@ -361,6 +361,35 @@ func (s *SettingService) buildSystemSettingsUpdates(ctx context.Context, setting
 	// 默认配置
 	updates[SettingKeyDefaultConcurrency] = strconv.Itoa(settings.DefaultConcurrency)
 	updates[SettingKeyDefaultBalance] = strconv.FormatFloat(settings.DefaultBalance, 'f', 8, 64)
+
+	// 签到赠送额度（清洗非法值：空表/负数回退默认，避免签到服务配置错误）
+	if len(settings.CheckInRewards) == 0 {
+		settings.CheckInRewards = DefaultCheckInRewards
+	}
+	cleanedRewards := make([]float64, 0, len(settings.CheckInRewards))
+	for _, r := range settings.CheckInRewards {
+		if r <= 0 {
+			cleanedRewards = append(cleanedRewards, DefaultCheckInRewards[len(cleanedRewards)%len(DefaultCheckInRewards)])
+		} else {
+			cleanedRewards = append(cleanedRewards, r)
+		}
+	}
+	settings.CheckInRewards = cleanedRewards
+	if settings.CheckInMinRegAgeHours < 0 {
+		settings.CheckInMinRegAgeHours = DefaultCheckInMinRegAgeHours
+	}
+	if settings.CheckInMaxMonthlyAmount < 0 {
+		settings.CheckInMaxMonthlyAmount = DefaultCheckInMaxMonthlyAmount
+	}
+	rewardsJSON, err := json.Marshal(settings.CheckInRewards)
+	if err != nil {
+		return nil, fmt.Errorf("marshal check-in rewards: %w", err)
+	}
+	updates[SettingKeyCheckInEnabled] = strconv.FormatBool(settings.CheckInEnabled)
+	updates[SettingKeyCheckInRewards] = string(rewardsJSON)
+	updates[SettingKeyCheckInMinRegAgeHours] = strconv.Itoa(settings.CheckInMinRegAgeHours)
+	updates[SettingKeyCheckInMaxMonthlyAmount] = strconv.FormatFloat(settings.CheckInMaxMonthlyAmount, 'f', 8, 64)
+
 	settings.AffiliateRebateRate = clampAffiliateRebateRate(settings.AffiliateRebateRate)
 	updates[SettingKeyAffiliateRebateRate] = strconv.FormatFloat(settings.AffiliateRebateRate, 'f', 8, 64)
 	if settings.AffiliateRebateFreezeHours < 0 {
